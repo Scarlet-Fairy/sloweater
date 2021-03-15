@@ -1,0 +1,6 @@
+
+root = "/go/src/github.com/Scarlet-Fairy/sloweater"
+
+[build]
+cmd = "make build"
+bin = "bin/sloweater"

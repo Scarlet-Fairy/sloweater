@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "github.com/Scarlet-Fairy/sloweater;sloweater";
+
+service Scheduler {
+  rpc CreateWorkloadImage (CreateWorkloadImageRequest) returns (CreateWorkloadImageResponse) {}
+  rpc ScheduleWorkload (ScheduleWorkloadRequest) returns (ScheduleWorkloadResponse) {}
+  //rpc
+}
+
+message CreateWorkloadImageRequest {
+  string workload_id = 1;
+  string github_repo_url = 2;
+
+}
+
+message CreateWorkloadImageResponse {
+  string job_id = 1;
+}
+
+message ScheduleWorkloadRequest {
+
+}
+
+message ScheduleWorkloadResponse {
+
+}

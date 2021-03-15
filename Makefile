@@ -73,6 +73,16 @@ build: vendor
 docker-build: vendor
 	docker build --rm --tag $(BINARY_NAME) .
 
+proto-build:
+	@ if ! which protoc > /dev/null; then \
+    		echo "error: protoc not installed" >&2; \
+    		exit 1; \
+	fi
+	go get -u -v github.com/golang/protobuf/protoc-gen-go
+	for file in $$(git ls-files '*.proto'); do \
+		protoc -I $$(dirname $$file) --go_out=plugins=grpc:$$(dirname $$file) $$file; \
+	done
+
 docker-release:
 	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):latest
 	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
@@ -120,6 +130,7 @@ help:
 	@echo "  ${YELLOW}build           ${RESET} ${GREEN}Build your project and put the output binary in $(BIN_FOLDER)(BINARY_NAME)${RESET}"
 	@echo "  ${YELLOW}clean           ${RESET} ${GREEN}Remove build related file${RESET}"
 	@echo "  ${YELLOW}docker-build    ${RESET} ${GREEN}Use the dockerfile to build the container (name: $(BINARY_NAME))${RESET}"
+	@echo "  ${YELLOW}proto-build     ${RESET} ${GREEN}Use protoc to compile gRPC service definitions ${RESET}"
 	@echo "  ${YELLOW}docker-release  ${RESET} ${GREEN}Release the container \"$(DOCKER_REGISTRY)$(BINARY_NAME)\" with tag latest and $(VERSION) ${RESET}"
 	@echo "  ${YELLOW}docker-run      ${RESET} ${GREEN}Build and run the container ${RESET}"
 	@echo "  ${YELLOW}lint            ${RESET} ${GREEN}Run all available linters${RESET}"

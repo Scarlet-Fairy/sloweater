@@ -2,21 +2,19 @@ syntax = "proto3";
 
 package pb;
 
-option go_package = "github.com/Scarlet-Fairy/sloweater;sloweater";
-
 service Scheduler {
-  rpc CreateWorkloadImage (CreateWorkloadImageRequest) returns (CreateWorkloadImageResponse) {}
+  rpc ScheduleImageBuild (ScheduleImageBuildRequest) returns (ScheduleImageBuildResponse) {}
   rpc ScheduleWorkload (ScheduleWorkloadRequest) returns (ScheduleWorkloadResponse) {}
-  //rpc
+  rpc GetImageBuildStatus (GetImageBuildStatusRequest) returns (GetImageBuildStatusResponse) {}
+  rpc GetWorkloadStatus (GetWorkloadStatusRequest) returns (GetWorkloadStatusResponse) {}
 }
 
-message CreateWorkloadImageRequest {
+message ScheduleImageBuildRequest {
   string workload_id = 1;
-  string github_repo_url = 2;
-
+  string git_repo_url = 2;
 }
 
-message CreateWorkloadImageResponse {
+message ScheduleImageBuildResponse {
   string job_id = 1;
 }
 
@@ -27,3 +25,38 @@ message ScheduleWorkloadRequest {
 message ScheduleWorkloadResponse {
 
 }
+
+message GetImageBuildStatusRequest {
+  string job_id = 1;
+}
+
+message GetImageBuildStatusResponse {
+  enum ImageBuildStatus {
+    UNKNOWN_STATUS  = 0;
+    ERROR           = 1;
+    COMPLETED       = 2;
+    LOADING         = 3;
+  }
+  ImageBuildStatus status = 1;
+
+  message BuildStepStatus {
+    enum ImageBuildSteps {
+      UNKNOWN_STEP  = 0;
+      CLONE         = 1;
+      BUILD         = 2;
+      PUSH          = 3;
+    }
+    ImageBuildSteps step = 1;
+    string error = 2;
+  }
+  repeated BuildStepStatus steps = 2;
+}
+
+message GetWorkloadStatusRequest {
+  string job_id = 1;
+}
+
+message GetWorkloadStatusResponse {
+
+}
+

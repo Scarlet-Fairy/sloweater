@@ -29,17 +29,121 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type CreateWorkloadImageRequest struct {
+type GetImageBuildStatusResponse_ImageBuildStatus int32
+
+const (
+	GetImageBuildStatusResponse_UNKNOWN_STATUS GetImageBuildStatusResponse_ImageBuildStatus = 0
+	GetImageBuildStatusResponse_ERROR          GetImageBuildStatusResponse_ImageBuildStatus = 1
+	GetImageBuildStatusResponse_COMPLETED      GetImageBuildStatusResponse_ImageBuildStatus = 2
+	GetImageBuildStatusResponse_LOADING        GetImageBuildStatusResponse_ImageBuildStatus = 3
+)
+
+// Enum value maps for GetImageBuildStatusResponse_ImageBuildStatus.
+var (
+	GetImageBuildStatusResponse_ImageBuildStatus_name = map[int32]string{
+		0: "UNKNOWN_STATUS",
+		1: "ERROR",
+		2: "COMPLETED",
+		3: "LOADING",
+	}
+	GetImageBuildStatusResponse_ImageBuildStatus_value = map[string]int32{
+		"UNKNOWN_STATUS": 0,
+		"ERROR":          1,
+		"COMPLETED":      2,
+		"LOADING":        3,
+	}
+)
+
+func (x GetImageBuildStatusResponse_ImageBuildStatus) Enum() *GetImageBuildStatusResponse_ImageBuildStatus {
+	p := new(GetImageBuildStatusResponse_ImageBuildStatus)
+	*p = x
+	return p
+}
+
+func (x GetImageBuildStatusResponse_ImageBuildStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GetImageBuildStatusResponse_ImageBuildStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_sloweater_svc_proto_enumTypes[0].Descriptor()
+}
+
+func (GetImageBuildStatusResponse_ImageBuildStatus) Type() protoreflect.EnumType {
+	return &file_sloweater_svc_proto_enumTypes[0]
+}
+
+func (x GetImageBuildStatusResponse_ImageBuildStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GetImageBuildStatusResponse_ImageBuildStatus.Descriptor instead.
+func (GetImageBuildStatusResponse_ImageBuildStatus) EnumDescriptor() ([]byte, []int) {
+	return file_sloweater_svc_proto_rawDescGZIP(), []int{5, 0}
+}
+
+type GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps int32
+
+const (
+	GetImageBuildStatusResponse_BuildStepStatus_UNKNOWN_STEP GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps = 0
+	GetImageBuildStatusResponse_BuildStepStatus_CLONE        GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps = 1
+	GetImageBuildStatusResponse_BuildStepStatus_BUILD        GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps = 2
+	GetImageBuildStatusResponse_BuildStepStatus_PUSH         GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps = 3
+)
+
+// Enum value maps for GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps.
+var (
+	GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps_name = map[int32]string{
+		0: "UNKNOWN_STEP",
+		1: "CLONE",
+		2: "BUILD",
+		3: "PUSH",
+	}
+	GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps_value = map[string]int32{
+		"UNKNOWN_STEP": 0,
+		"CLONE":        1,
+		"BUILD":        2,
+		"PUSH":         3,
+	}
+)
+
+func (x GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps) Enum() *GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps {
+	p := new(GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps)
+	*p = x
+	return p
+}
+
+func (x GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps) Descriptor() protoreflect.EnumDescriptor {
+	return file_sloweater_svc_proto_enumTypes[1].Descriptor()
+}
+
+func (GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps) Type() protoreflect.EnumType {
+	return &file_sloweater_svc_proto_enumTypes[1]
+}
+
+func (x GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps.Descriptor instead.
+func (GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps) EnumDescriptor() ([]byte, []int) {
+	return file_sloweater_svc_proto_rawDescGZIP(), []int{5, 0, 0}
+}
+
+type ScheduleImageBuildRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	WorkloadId    string `protobuf:"bytes,1,opt,name=workload_id,json=workloadId,proto3" json:"workload_id,omitempty"`
-	GithubRepoUrl string `protobuf:"bytes,2,opt,name=github_repo_url,json=githubRepoUrl,proto3" json:"github_repo_url,omitempty"` //string
+	WorkloadId string `protobuf:"bytes,1,opt,name=workload_id,json=workloadId,proto3" json:"workload_id,omitempty"`
+	GitRepoUrl string `protobuf:"bytes,2,opt,name=git_repo_url,json=gitRepoUrl,proto3" json:"git_repo_url,omitempty"`
 }
 
-func (x *CreateWorkloadImageRequest) Reset() {
-	*x = CreateWorkloadImageRequest{}
+func (x *ScheduleImageBuildRequest) Reset() {
+	*x = ScheduleImageBuildRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_sloweater_svc_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -47,13 +151,13 @@ func (x *CreateWorkloadImageRequest) Reset() {
 	}
 }
 
-func (x *CreateWorkloadImageRequest) String() string {
+func (x *ScheduleImageBuildRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateWorkloadImageRequest) ProtoMessage() {}
+func (*ScheduleImageBuildRequest) ProtoMessage() {}
 
-func (x *CreateWorkloadImageRequest) ProtoReflect() protoreflect.Message {
+func (x *ScheduleImageBuildRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_sloweater_svc_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -65,26 +169,26 @@ func (x *CreateWorkloadImageRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateWorkloadImageRequest.ProtoReflect.Descriptor instead.
-func (*CreateWorkloadImageRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ScheduleImageBuildRequest.ProtoReflect.Descriptor instead.
+func (*ScheduleImageBuildRequest) Descriptor() ([]byte, []int) {
 	return file_sloweater_svc_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *CreateWorkloadImageRequest) GetWorkloadId() string {
+func (x *ScheduleImageBuildRequest) GetWorkloadId() string {
 	if x != nil {
 		return x.WorkloadId
 	}
 	return ""
 }
 
-func (x *CreateWorkloadImageRequest) GetGithubRepoUrl() string {
+func (x *ScheduleImageBuildRequest) GetGitRepoUrl() string {
 	if x != nil {
-		return x.GithubRepoUrl
+		return x.GitRepoUrl
 	}
 	return ""
 }
 
-type CreateWorkloadImageResponse struct {
+type ScheduleImageBuildResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -92,8 +196,8 @@ type CreateWorkloadImageResponse struct {
 	JobId string `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 }
 
-func (x *CreateWorkloadImageResponse) Reset() {
-	*x = CreateWorkloadImageResponse{}
+func (x *ScheduleImageBuildResponse) Reset() {
+	*x = ScheduleImageBuildResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_sloweater_svc_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -101,13 +205,13 @@ func (x *CreateWorkloadImageResponse) Reset() {
 	}
 }
 
-func (x *CreateWorkloadImageResponse) String() string {
+func (x *ScheduleImageBuildResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateWorkloadImageResponse) ProtoMessage() {}
+func (*ScheduleImageBuildResponse) ProtoMessage() {}
 
-func (x *CreateWorkloadImageResponse) ProtoReflect() protoreflect.Message {
+func (x *ScheduleImageBuildResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_sloweater_svc_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -119,12 +223,12 @@ func (x *CreateWorkloadImageResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateWorkloadImageResponse.ProtoReflect.Descriptor instead.
-func (*CreateWorkloadImageResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ScheduleImageBuildResponse.ProtoReflect.Descriptor instead.
+func (*ScheduleImageBuildResponse) Descriptor() ([]byte, []int) {
 	return file_sloweater_svc_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateWorkloadImageResponse) GetJobId() string {
+func (x *ScheduleImageBuildResponse) GetJobId() string {
 	if x != nil {
 		return x.JobId
 	}
@@ -207,36 +311,325 @@ func (*ScheduleWorkloadResponse) Descriptor() ([]byte, []int) {
 	return file_sloweater_svc_proto_rawDescGZIP(), []int{3}
 }
 
+type GetImageBuildStatusRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	JobId string `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+}
+
+func (x *GetImageBuildStatusRequest) Reset() {
+	*x = GetImageBuildStatusRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sloweater_svc_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetImageBuildStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetImageBuildStatusRequest) ProtoMessage() {}
+
+func (x *GetImageBuildStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_sloweater_svc_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetImageBuildStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetImageBuildStatusRequest) Descriptor() ([]byte, []int) {
+	return file_sloweater_svc_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetImageBuildStatusRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type GetImageBuildStatusResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Status GetImageBuildStatusResponse_ImageBuildStatus   `protobuf:"varint,1,opt,name=status,proto3,enum=pb.GetImageBuildStatusResponse_ImageBuildStatus" json:"status,omitempty"`
+	Steps  []*GetImageBuildStatusResponse_BuildStepStatus `protobuf:"bytes,2,rep,name=steps,proto3" json:"steps,omitempty"`
+}
+
+func (x *GetImageBuildStatusResponse) Reset() {
+	*x = GetImageBuildStatusResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sloweater_svc_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetImageBuildStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetImageBuildStatusResponse) ProtoMessage() {}
+
+func (x *GetImageBuildStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_sloweater_svc_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetImageBuildStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetImageBuildStatusResponse) Descriptor() ([]byte, []int) {
+	return file_sloweater_svc_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetImageBuildStatusResponse) GetStatus() GetImageBuildStatusResponse_ImageBuildStatus {
+	if x != nil {
+		return x.Status
+	}
+	return GetImageBuildStatusResponse_UNKNOWN_STATUS
+}
+
+func (x *GetImageBuildStatusResponse) GetSteps() []*GetImageBuildStatusResponse_BuildStepStatus {
+	if x != nil {
+		return x.Steps
+	}
+	return nil
+}
+
+type GetWorkloadStatusRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	JobId string `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+}
+
+func (x *GetWorkloadStatusRequest) Reset() {
+	*x = GetWorkloadStatusRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sloweater_svc_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetWorkloadStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorkloadStatusRequest) ProtoMessage() {}
+
+func (x *GetWorkloadStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_sloweater_svc_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorkloadStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetWorkloadStatusRequest) Descriptor() ([]byte, []int) {
+	return file_sloweater_svc_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetWorkloadStatusRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type GetWorkloadStatusResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetWorkloadStatusResponse) Reset() {
+	*x = GetWorkloadStatusResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sloweater_svc_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetWorkloadStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorkloadStatusResponse) ProtoMessage() {}
+
+func (x *GetWorkloadStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_sloweater_svc_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorkloadStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetWorkloadStatusResponse) Descriptor() ([]byte, []int) {
+	return file_sloweater_svc_proto_rawDescGZIP(), []int{7}
+}
+
+type GetImageBuildStatusResponse_BuildStepStatus struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Step  GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps `protobuf:"varint,1,opt,name=step,proto3,enum=pb.GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps" json:"step,omitempty"`
+	Error string                                                      `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
+}
+
+func (x *GetImageBuildStatusResponse_BuildStepStatus) Reset() {
+	*x = GetImageBuildStatusResponse_BuildStepStatus{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sloweater_svc_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetImageBuildStatusResponse_BuildStepStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetImageBuildStatusResponse_BuildStepStatus) ProtoMessage() {}
+
+func (x *GetImageBuildStatusResponse_BuildStepStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_sloweater_svc_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetImageBuildStatusResponse_BuildStepStatus.ProtoReflect.Descriptor instead.
+func (*GetImageBuildStatusResponse_BuildStepStatus) Descriptor() ([]byte, []int) {
+	return file_sloweater_svc_proto_rawDescGZIP(), []int{5, 0}
+}
+
+func (x *GetImageBuildStatusResponse_BuildStepStatus) GetStep() GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps {
+	if x != nil {
+		return x.Step
+	}
+	return GetImageBuildStatusResponse_BuildStepStatus_UNKNOWN_STEP
+}
+
+func (x *GetImageBuildStatusResponse_BuildStepStatus) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
 var File_sloweater_svc_proto protoreflect.FileDescriptor
 
 var file_sloweater_svc_proto_rawDesc = []byte{
 	0x0a, 0x13, 0x73, 0x6c, 0x6f, 0x77, 0x65, 0x61, 0x74, 0x65, 0x72, 0x2d, 0x73, 0x76, 0x63, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x22, 0x65, 0x0a, 0x1a, 0x43, 0x72, 0x65,
-	0x61, 0x74, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x6d, 0x61, 0x67, 0x65,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x77, 0x6f, 0x72, 0x6b, 0x6c,
-	0x6f, 0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x77, 0x6f,
-	0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x0f, 0x67, 0x69, 0x74, 0x68,
-	0x75, 0x62, 0x5f, 0x72, 0x65, 0x70, 0x6f, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x0d, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x52, 0x65, 0x70, 0x6f, 0x55, 0x72, 0x6c,
-	0x22, 0x34, 0x0a, 0x1b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f,
-	0x61, 0x64, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x15, 0x0a, 0x06, 0x6a, 0x6f, 0x62, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x05, 0x6a, 0x6f, 0x62, 0x49, 0x64, 0x22, 0x19, 0x0a, 0x17, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75,
-	0x6c, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x22, 0x1a, 0x0a, 0x18, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x57, 0x6f, 0x72,
-	0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0xb6, 0x01,
-	0x0a, 0x09, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x72, 0x12, 0x58, 0x0a, 0x13, 0x43,
-	0x72, 0x65, 0x61, 0x74, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x6d, 0x61,
-	0x67, 0x65, 0x12, 0x1e, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x57, 0x6f,
-	0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x57, 0x6f,
-	0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x4f, 0x0a, 0x10, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c,
-	0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x1b, 0x2e, 0x70, 0x62, 0x2e, 0x53,
-	0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x63, 0x68, 0x65,
-	0x64, 0x75, 0x6c, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x22, 0x5e, 0x0a, 0x19, 0x53, 0x63, 0x68,
+	0x65, 0x64, 0x75, 0x6c, 0x65, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x77, 0x6f, 0x72, 0x6b, 0x6c, 0x6f,
+	0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x77, 0x6f, 0x72,
+	0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x64, 0x12, 0x20, 0x0a, 0x0c, 0x67, 0x69, 0x74, 0x5f, 0x72,
+	0x65, 0x70, 0x6f, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x67,
+	0x69, 0x74, 0x52, 0x65, 0x70, 0x6f, 0x55, 0x72, 0x6c, 0x22, 0x33, 0x0a, 0x1a, 0x53, 0x63, 0x68,
+	0x65, 0x64, 0x75, 0x6c, 0x65, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x15, 0x0a, 0x06, 0x6a, 0x6f, 0x62, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6a, 0x6f, 0x62, 0x49, 0x64, 0x22, 0x19,
+	0x0a, 0x17, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f,
+	0x61, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x1a, 0x0a, 0x18, 0x53, 0x63, 0x68,
+	0x65, 0x64, 0x75, 0x6c, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x33, 0x0a, 0x1a, 0x47, 0x65, 0x74, 0x49, 0x6d, 0x61, 0x67,
+	0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x15, 0x0a, 0x06, 0x6a, 0x6f, 0x62, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x6a, 0x6f, 0x62, 0x49, 0x64, 0x22, 0xc1, 0x03, 0x0a, 0x1b, 0x47,
+	0x65, 0x74, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74,
+	0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x48, 0x0a, 0x06, 0x73, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x30, 0x2e, 0x70, 0x62, 0x2e,
+	0x47, 0x65, 0x74, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x49, 0x6d, 0x61, 0x67,
+	0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x12, 0x45, 0x0a, 0x05, 0x73, 0x74, 0x65, 0x70, 0x73, 0x18, 0x02, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x2f, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x6d, 0x61, 0x67,
+	0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x65, 0x70, 0x53, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x52, 0x05, 0x73, 0x74, 0x65, 0x70, 0x73, 0x1a, 0xc1, 0x01, 0x0a, 0x0f,
+	0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x65, 0x70, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12,
+	0x53, 0x0a, 0x04, 0x73, 0x74, 0x65, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x3f, 0x2e,
+	0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x42,
+	0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x65, 0x70, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x2e, 0x49,
+	0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x65, 0x70, 0x73, 0x52, 0x04,
+	0x73, 0x74, 0x65, 0x70, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x43, 0x0a, 0x0f, 0x49, 0x6d,
+	0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x65, 0x70, 0x73, 0x12, 0x10, 0x0a,
+	0x0c, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x5f, 0x53, 0x54, 0x45, 0x50, 0x10, 0x00, 0x12,
+	0x09, 0x0a, 0x05, 0x43, 0x4c, 0x4f, 0x4e, 0x45, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x42, 0x55,
+	0x49, 0x4c, 0x44, 0x10, 0x02, 0x12, 0x08, 0x0a, 0x04, 0x50, 0x55, 0x53, 0x48, 0x10, 0x03, 0x22,
+	0x4d, 0x0a, 0x10, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x12, 0x12, 0x0a, 0x0e, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x5f, 0x53,
+	0x54, 0x41, 0x54, 0x55, 0x53, 0x10, 0x00, 0x12, 0x09, 0x0a, 0x05, 0x45, 0x52, 0x52, 0x4f, 0x52,
+	0x10, 0x01, 0x12, 0x0d, 0x0a, 0x09, 0x43, 0x4f, 0x4d, 0x50, 0x4c, 0x45, 0x54, 0x45, 0x44, 0x10,
+	0x02, 0x12, 0x0b, 0x0a, 0x07, 0x4c, 0x4f, 0x41, 0x44, 0x49, 0x4e, 0x47, 0x10, 0x03, 0x22, 0x31,
+	0x0a, 0x18, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x15, 0x0a, 0x06, 0x6a, 0x6f,
+	0x62, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6a, 0x6f, 0x62, 0x49,
+	0x64, 0x22, 0x1b, 0x0a, 0x19, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64,
+	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0xe1,
+	0x02, 0x0a, 0x09, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x72, 0x12, 0x55, 0x0a, 0x12,
+	0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69,
+	0x6c, 0x64, 0x12, 0x1d, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65,
+	0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x1e, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x49,
+	0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x12, 0x4f, 0x0a, 0x10, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x57,
+	0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x12, 0x1b, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x63, 0x68,
+	0x65, 0x64, 0x75, 0x6c, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75,
+	0x6c, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x58, 0x0a, 0x13, 0x47, 0x65, 0x74, 0x49, 0x6d, 0x61, 0x67, 0x65,
+	0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1e, 0x2e, 0x70, 0x62,
+	0x2e, 0x47, 0x65, 0x74, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x70, 0x62,
+	0x2e, 0x47, 0x65, 0x74, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x53, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52,
+	0x0a, 0x11, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f, 0x61, 0x64, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x12, 0x1c, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6b,
+	0x6c, 0x6f, 0x61, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x1d, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x65, 0x74, 0x57, 0x6f, 0x72, 0x6b, 0x6c, 0x6f,
+	0x61, 0x64, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -251,23 +644,38 @@ func file_sloweater_svc_proto_rawDescGZIP() []byte {
 	return file_sloweater_svc_proto_rawDescData
 }
 
-var file_sloweater_svc_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_sloweater_svc_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_sloweater_svc_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_sloweater_svc_proto_goTypes = []interface{}{
-	(*CreateWorkloadImageRequest)(nil),  // 0: pb.CreateWorkloadImageRequest
-	(*CreateWorkloadImageResponse)(nil), // 1: pb.CreateWorkloadImageResponse
-	(*ScheduleWorkloadRequest)(nil),     // 2: pb.ScheduleWorkloadRequest
-	(*ScheduleWorkloadResponse)(nil),    // 3: pb.ScheduleWorkloadResponse
+	(GetImageBuildStatusResponse_ImageBuildStatus)(0),                // 0: pb.GetImageBuildStatusResponse.ImageBuildStatus
+	(GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps)(0), // 1: pb.GetImageBuildStatusResponse.BuildStepStatus.ImageBuildSteps
+	(*ScheduleImageBuildRequest)(nil),                                // 2: pb.ScheduleImageBuildRequest
+	(*ScheduleImageBuildResponse)(nil),                               // 3: pb.ScheduleImageBuildResponse
+	(*ScheduleWorkloadRequest)(nil),                                  // 4: pb.ScheduleWorkloadRequest
+	(*ScheduleWorkloadResponse)(nil),                                 // 5: pb.ScheduleWorkloadResponse
+	(*GetImageBuildStatusRequest)(nil),                               // 6: pb.GetImageBuildStatusRequest
+	(*GetImageBuildStatusResponse)(nil),                              // 7: pb.GetImageBuildStatusResponse
+	(*GetWorkloadStatusRequest)(nil),                                 // 8: pb.GetWorkloadStatusRequest
+	(*GetWorkloadStatusResponse)(nil),                                // 9: pb.GetWorkloadStatusResponse
+	(*GetImageBuildStatusResponse_BuildStepStatus)(nil),              // 10: pb.GetImageBuildStatusResponse.BuildStepStatus
 }
 var file_sloweater_svc_proto_depIdxs = []int32{
-	0, // 0: pb.Scheduler.CreateWorkloadImage:input_type -> pb.CreateWorkloadImageRequest
-	2, // 1: pb.Scheduler.ScheduleWorkload:input_type -> pb.ScheduleWorkloadRequest
-	1, // 2: pb.Scheduler.CreateWorkloadImage:output_type -> pb.CreateWorkloadImageResponse
-	3, // 3: pb.Scheduler.ScheduleWorkload:output_type -> pb.ScheduleWorkloadResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: pb.GetImageBuildStatusResponse.status:type_name -> pb.GetImageBuildStatusResponse.ImageBuildStatus
+	10, // 1: pb.GetImageBuildStatusResponse.steps:type_name -> pb.GetImageBuildStatusResponse.BuildStepStatus
+	1,  // 2: pb.GetImageBuildStatusResponse.BuildStepStatus.step:type_name -> pb.GetImageBuildStatusResponse.BuildStepStatus.ImageBuildSteps
+	2,  // 3: pb.Scheduler.ScheduleImageBuild:input_type -> pb.ScheduleImageBuildRequest
+	4,  // 4: pb.Scheduler.ScheduleWorkload:input_type -> pb.ScheduleWorkloadRequest
+	6,  // 5: pb.Scheduler.GetImageBuildStatus:input_type -> pb.GetImageBuildStatusRequest
+	8,  // 6: pb.Scheduler.GetWorkloadStatus:input_type -> pb.GetWorkloadStatusRequest
+	3,  // 7: pb.Scheduler.ScheduleImageBuild:output_type -> pb.ScheduleImageBuildResponse
+	5,  // 8: pb.Scheduler.ScheduleWorkload:output_type -> pb.ScheduleWorkloadResponse
+	7,  // 9: pb.Scheduler.GetImageBuildStatus:output_type -> pb.GetImageBuildStatusResponse
+	9,  // 10: pb.Scheduler.GetWorkloadStatus:output_type -> pb.GetWorkloadStatusResponse
+	7,  // [7:11] is the sub-list for method output_type
+	3,  // [3:7] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_sloweater_svc_proto_init() }
@@ -277,7 +685,7 @@ func file_sloweater_svc_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_sloweater_svc_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateWorkloadImageRequest); i {
+			switch v := v.(*ScheduleImageBuildRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -289,7 +697,7 @@ func file_sloweater_svc_proto_init() {
 			}
 		}
 		file_sloweater_svc_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateWorkloadImageResponse); i {
+			switch v := v.(*ScheduleImageBuildResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -324,19 +732,80 @@ func file_sloweater_svc_proto_init() {
 				return nil
 			}
 		}
+		file_sloweater_svc_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetImageBuildStatusRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sloweater_svc_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetImageBuildStatusResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sloweater_svc_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetWorkloadStatusRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sloweater_svc_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetWorkloadStatusResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sloweater_svc_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetImageBuildStatusResponse_BuildStepStatus); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_sloweater_svc_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   4,
+			NumEnums:      2,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_sloweater_svc_proto_goTypes,
 		DependencyIndexes: file_sloweater_svc_proto_depIdxs,
+		EnumInfos:         file_sloweater_svc_proto_enumTypes,
 		MessageInfos:      file_sloweater_svc_proto_msgTypes,
 	}.Build()
 	File_sloweater_svc_proto = out.File
@@ -357,8 +826,10 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type SchedulerClient interface {
-	CreateWorkloadImage(ctx context.Context, in *CreateWorkloadImageRequest, opts ...grpc.CallOption) (*CreateWorkloadImageResponse, error)
+	ScheduleImageBuild(ctx context.Context, in *ScheduleImageBuildRequest, opts ...grpc.CallOption) (*ScheduleImageBuildResponse, error)
 	ScheduleWorkload(ctx context.Context, in *ScheduleWorkloadRequest, opts ...grpc.CallOption) (*ScheduleWorkloadResponse, error)
+	GetImageBuildStatus(ctx context.Context, in *GetImageBuildStatusRequest, opts ...grpc.CallOption) (*GetImageBuildStatusResponse, error)
+	GetWorkloadStatus(ctx context.Context, in *GetWorkloadStatusRequest, opts ...grpc.CallOption) (*GetWorkloadStatusResponse, error)
 }
 
 type schedulerClient struct {
@@ -369,9 +840,9 @@ func NewSchedulerClient(cc grpc.ClientConnInterface) SchedulerClient {
 	return &schedulerClient{cc}
 }
 
-func (c *schedulerClient) CreateWorkloadImage(ctx context.Context, in *CreateWorkloadImageRequest, opts ...grpc.CallOption) (*CreateWorkloadImageResponse, error) {
-	out := new(CreateWorkloadImageResponse)
-	err := c.cc.Invoke(ctx, "/pb.Scheduler/CreateWorkloadImage", in, out, opts...)
+func (c *schedulerClient) ScheduleImageBuild(ctx context.Context, in *ScheduleImageBuildRequest, opts ...grpc.CallOption) (*ScheduleImageBuildResponse, error) {
+	out := new(ScheduleImageBuildResponse)
+	err := c.cc.Invoke(ctx, "/pb.Scheduler/ScheduleImageBuild", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -387,41 +858,67 @@ func (c *schedulerClient) ScheduleWorkload(ctx context.Context, in *ScheduleWork
 	return out, nil
 }
 
+func (c *schedulerClient) GetImageBuildStatus(ctx context.Context, in *GetImageBuildStatusRequest, opts ...grpc.CallOption) (*GetImageBuildStatusResponse, error) {
+	out := new(GetImageBuildStatusResponse)
+	err := c.cc.Invoke(ctx, "/pb.Scheduler/GetImageBuildStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *schedulerClient) GetWorkloadStatus(ctx context.Context, in *GetWorkloadStatusRequest, opts ...grpc.CallOption) (*GetWorkloadStatusResponse, error) {
+	out := new(GetWorkloadStatusResponse)
+	err := c.cc.Invoke(ctx, "/pb.Scheduler/GetWorkloadStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SchedulerServer is the server API for Scheduler service.
 type SchedulerServer interface {
-	CreateWorkloadImage(context.Context, *CreateWorkloadImageRequest) (*CreateWorkloadImageResponse, error)
+	ScheduleImageBuild(context.Context, *ScheduleImageBuildRequest) (*ScheduleImageBuildResponse, error)
 	ScheduleWorkload(context.Context, *ScheduleWorkloadRequest) (*ScheduleWorkloadResponse, error)
+	GetImageBuildStatus(context.Context, *GetImageBuildStatusRequest) (*GetImageBuildStatusResponse, error)
+	GetWorkloadStatus(context.Context, *GetWorkloadStatusRequest) (*GetWorkloadStatusResponse, error)
 }
 
 // UnimplementedSchedulerServer can be embedded to have forward compatible implementations.
 type UnimplementedSchedulerServer struct {
 }
 
-func (*UnimplementedSchedulerServer) CreateWorkloadImage(context.Context, *CreateWorkloadImageRequest) (*CreateWorkloadImageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateWorkloadImage not implemented")
+func (*UnimplementedSchedulerServer) ScheduleImageBuild(context.Context, *ScheduleImageBuildRequest) (*ScheduleImageBuildResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ScheduleImageBuild not implemented")
 }
 func (*UnimplementedSchedulerServer) ScheduleWorkload(context.Context, *ScheduleWorkloadRequest) (*ScheduleWorkloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ScheduleWorkload not implemented")
+}
+func (*UnimplementedSchedulerServer) GetImageBuildStatus(context.Context, *GetImageBuildStatusRequest) (*GetImageBuildStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetImageBuildStatus not implemented")
+}
+func (*UnimplementedSchedulerServer) GetWorkloadStatus(context.Context, *GetWorkloadStatusRequest) (*GetWorkloadStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWorkloadStatus not implemented")
 }
 
 func RegisterSchedulerServer(s *grpc.Server, srv SchedulerServer) {
 	s.RegisterService(&_Scheduler_serviceDesc, srv)
 }
 
-func _Scheduler_CreateWorkloadImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateWorkloadImageRequest)
+func _Scheduler_ScheduleImageBuild_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ScheduleImageBuildRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SchedulerServer).CreateWorkloadImage(ctx, in)
+		return srv.(SchedulerServer).ScheduleImageBuild(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.Scheduler/CreateWorkloadImage",
+		FullMethod: "/pb.Scheduler/ScheduleImageBuild",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SchedulerServer).CreateWorkloadImage(ctx, req.(*CreateWorkloadImageRequest))
+		return srv.(SchedulerServer).ScheduleImageBuild(ctx, req.(*ScheduleImageBuildRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -444,17 +941,61 @@ func _Scheduler_ScheduleWorkload_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Scheduler_GetImageBuildStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetImageBuildStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchedulerServer).GetImageBuildStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Scheduler/GetImageBuildStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchedulerServer).GetImageBuildStatus(ctx, req.(*GetImageBuildStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Scheduler_GetWorkloadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorkloadStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SchedulerServer).GetWorkloadStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.Scheduler/GetWorkloadStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SchedulerServer).GetWorkloadStatus(ctx, req.(*GetWorkloadStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Scheduler_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Scheduler",
 	HandlerType: (*SchedulerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateWorkloadImage",
-			Handler:    _Scheduler_CreateWorkloadImage_Handler,
+			MethodName: "ScheduleImageBuild",
+			Handler:    _Scheduler_ScheduleImageBuild_Handler,
 		},
 		{
 			MethodName: "ScheduleWorkload",
 			Handler:    _Scheduler_ScheduleWorkload_Handler,
+		},
+		{
+			MethodName: "GetImageBuildStatus",
+			Handler:    _Scheduler_GetImageBuildStatus_Handler,
+		},
+		{
+			MethodName: "GetWorkloadStatus",
+			Handler:    _Scheduler_GetWorkloadStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

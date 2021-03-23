@@ -4,8 +4,10 @@ package pb;
 
 service Scheduler {
   rpc ScheduleImageBuild (ScheduleImageBuildRequest) returns (ScheduleImageBuildResponse) {}
-  rpc ScheduleWorkload (ScheduleWorkloadRequest) returns (ScheduleWorkloadResponse) {}
   rpc GetImageBuildStatus (GetImageBuildStatusRequest) returns (GetImageBuildStatusResponse) {}
+  rpc GetSchedulesImageBuildWorkloads (GetSchedulesImageBuildWorkloadsRequest) returns (GetSchedulesImageBuildWorkloadsResponse)  {}
+
+  rpc ScheduleWorkload (ScheduleWorkloadRequest) returns (ScheduleWorkloadResponse) {}
   rpc GetWorkloadStatus (GetWorkloadStatusRequest) returns (GetWorkloadStatusResponse) {}
 }
 
@@ -18,14 +20,6 @@ message ScheduleImageBuildResponse {
   string job_id = 1;
 }
 
-message ScheduleWorkloadRequest {
-
-}
-
-message ScheduleWorkloadResponse {
-
-}
-
 message GetImageBuildStatusRequest {
   string job_id = 1;
 }
@@ -34,8 +28,8 @@ message GetImageBuildStatusResponse {
   enum ImageBuildStatus {
     UNKNOWN_STATUS  = 0;
     ERROR           = 1;
-    COMPLETED       = 2;
-    LOADING         = 3;
+    LOADING         = 2;
+    COMPLETED       = 3;
   }
   ImageBuildStatus status = 1;
 
@@ -52,6 +46,24 @@ message GetImageBuildStatusResponse {
   repeated BuildStepStatus steps = 2;
 }
 
+message GetSchedulesImageBuildWorkloadsRequest {
+
+}
+
+message GetSchedulesImageBuildWorkloadsResponse {
+  repeated string jobs = 1;
+}
+
+/* ------------------------------------ */
+
+message ScheduleWorkloadRequest {
+
+}
+
+message ScheduleWorkloadResponse {
+
+}
+
 message GetWorkloadStatusRequest {
   string job_id = 1;
 }
@@ -59,4 +71,3 @@ message GetWorkloadStatusRequest {
 message GetWorkloadStatusResponse {
 
 }
-

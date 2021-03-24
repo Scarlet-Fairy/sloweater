@@ -5,15 +5,17 @@ package pb;
 service Scheduler {
   rpc ScheduleImageBuild (ScheduleImageBuildRequest) returns (ScheduleImageBuildResponse) {}
   rpc GetImageBuildStatus (GetImageBuildStatusRequest) returns (GetImageBuildStatusResponse) {}
-  rpc GetSchedulesImageBuildWorkloads (GetSchedulesImageBuildWorkloadsRequest) returns (GetSchedulesImageBuildWorkloadsResponse)  {}
+  rpc GetScheduledImageBuildWorkloads (GetScheduledImageBuildWorkloadsRequest) returns (GetScheduledImageBuildWorkloadsResponse)  {}
 
   rpc ScheduleWorkload (ScheduleWorkloadRequest) returns (ScheduleWorkloadResponse) {}
   rpc GetWorkloadStatus (GetWorkloadStatusRequest) returns (GetWorkloadStatusResponse) {}
 }
 
 message ScheduleImageBuildRequest {
-  string workload_id = 1;
+  string workload_id  = 1;
   string git_repo_url = 2;
+  string region       = 3;
+  uint32 priority     = 4;
 }
 
 message ScheduleImageBuildResponse {
@@ -46,11 +48,11 @@ message GetImageBuildStatusResponse {
   repeated BuildStepStatus steps = 2;
 }
 
-message GetSchedulesImageBuildWorkloadsRequest {
+message GetScheduledImageBuildWorkloadsRequest {
 
 }
 
-message GetSchedulesImageBuildWorkloadsResponse {
+message GetScheduledImageBuildWorkloadsResponse {
   repeated string jobs = 1;
 }
 

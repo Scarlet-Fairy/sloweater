@@ -8,6 +8,7 @@ type Service interface {
 	ScheduleImageBuild(ctx context.Context, workloadId, githubRepo string) (string, error)
 	GetImageBuildStatus(ctx context.Context, jobId string) (*Job, error)
 	GetSchedulesImageBuildWorkloads(ctx context.Context) ([]string, error)
+
 	ScheduleWorkload(ctx context.Context) error
 	GetWorkloadStatus(ctx context.Context) error
 }

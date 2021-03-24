@@ -1,7 +1,14 @@
 package service
 
-import "context"
+import (
+	"context"
+	"github.com/pkg/errors"
+)
+
+var (
+	ErrBuildImageSchedulation = errors.New("")
+)
 
 type Orchestrator interface {
-	ScheduleBuildImageJob(ctx context.Context, jobId, githubRepo string) error
+	ScheduleBuildImageJob(ctx context.Context, jobId JobId, githubRepo string) error
 }

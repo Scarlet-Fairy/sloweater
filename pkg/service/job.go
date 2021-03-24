@@ -1,5 +1,7 @@
 package service
 
+import "fmt"
+
 type Status byte
 
 const (
@@ -29,4 +31,25 @@ type Job struct {
 	Id     string
 	Status Status
 	Step   Step
+}
+
+type JobId string
+
+const (
+	JobTypeImageBuild = "ImageBuild"
+	NameImageBuilder  = "cobold"
+)
+
+func (id JobId) NameImageBuild() string {
+	return fmt.Sprintf("%s.%s", JobTypeImageBuild, id)
+}
+
+func (id JobId) ImageName(registry *string) string {
+	imageName := fmt.Sprintf("%s/%s", NameImageBuilder, id)
+
+	if registry != nil {
+		return fmt.Sprintf("%s/%s", *registry, imageName)
+	}
+
+	return imageName
 }

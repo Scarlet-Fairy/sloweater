@@ -75,14 +75,9 @@ func (r redisRepository) ListJobs(ctx context.Context) ([]string, error) {
 }
 
 func (r redisRepository) SetJobStep(ctx context.Context, jobId string, step service.Step) error {
-	cmd := r.client.Get(ctx, jobId)
-	if err := cmd.Err(); err != nil {
-		return errors.Wrap(err, "getting job")
-	}
-
-	job := &service.Job{}
-	if err := json.Unmarshal([]byte(cmd.String()), job); err != nil {
-		return ErrInvalidJobFormat
+	job, err := r.GetJob(ctx, jobId)
+	if err != nil {
+		return err
 	}
 
 	job.Step = step
@@ -95,14 +90,9 @@ func (r redisRepository) SetJobStep(ctx context.Context, jobId string, step serv
 }
 
 func (r redisRepository) SetJobStatus(ctx context.Context, jobId string, status service.Status) error {
-	cmd := r.client.Get(ctx, jobId)
-	if err := cmd.Err(); err != nil {
-		return errors.Wrap(err, "getting job")
-	}
-
-	job := &service.Job{}
-	if err := json.Unmarshal([]byte(cmd.String()), job); err != nil {
-		return ErrInvalidJobFormat
+	job, err := r.GetJob(ctx, jobId)
+	if err != nil {
+		return err
 	}
 
 	job.Status = status

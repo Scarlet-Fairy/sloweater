@@ -6,10 +6,10 @@ import (
 
 type Service interface {
 	ScheduleImageBuild(ctx context.Context, workloadId, githubRepo string) (string, error)
-	GetImageBuildStatus(ctx context.Context, jobId string) error
+	GetImageBuildStatus(ctx context.Context, jobId string) (*Job, error)
 	GetSchedulesImageBuildWorkloads(ctx context.Context) ([]string, error)
-	ScheduleWorkload(context.Context) error
-	GetWorkloadStatus(context.Context) error
+	ScheduleWorkload(ctx context.Context) error
+	GetWorkloadStatus(ctx context.Context) error
 }
 
 func NewService(orchestrator Orchestrator, repository Repository) Service {
@@ -35,7 +35,7 @@ func (s basicService) ScheduleImageBuild(ctx context.Context, workloadId string,
 		return "", err
 	}
 
-	if err := s.pubsub.ListenImageBuildEvents(jobId); err != nil {
+	if err := s.pubsub.ListenImageBuildEvents(ctx, jobId); err != nil {
 		return "", err
 	}
 

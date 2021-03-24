@@ -3,18 +3,27 @@ package service
 type Status byte
 
 const (
-	Error     Status = 1
-	Loading   Status = 2
-	Completed Status = 3
+	StatusError     Status = 1
+	StatusLoading   Status = 2
+	StatusCompleted Status = 3
 )
+
+func (s Status) IsValid() bool {
+	return s == StatusError || s == StatusLoading || s == StatusCompleted
+}
 
 type Step byte
 
 const (
-	Clone Step = 1
-	Build Step = 2
-	Push  Step = 3
+	StepInit  Step = 0
+	StepClone Step = 1
+	StepBuild Step = 2
+	StepPush  Step = 3
 )
+
+func (s Step) IsValid() bool {
+	return s == StepInit || s == StepClone || s == StepBuild || s == StepPush
+}
 
 type Job struct {
 	Id     string

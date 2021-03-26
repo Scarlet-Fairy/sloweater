@@ -78,8 +78,9 @@ proto-build:
     		echo "error: protoc not installed" >&2; \
     		exit 1; \
 	fi
-	@go get -u  google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	protoc \
+	@go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+	@go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	@protoc \
 		--go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		pb/sloweater.proto

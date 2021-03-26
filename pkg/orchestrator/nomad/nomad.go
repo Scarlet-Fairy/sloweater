@@ -7,8 +7,9 @@ import (
 )
 
 type nomadOrchestrator struct {
-	client *api.Client
-	region string
+	client  *api.Client
+	region  string
+	lokiUrl string
 }
 
 const (
@@ -16,10 +17,11 @@ const (
 	DriverDocker       = "docker"
 )
 
-func New(client *api.Client, region string) service.Orchestrator {
+func New(client *api.Client, region string, lokiUrl string) service.Orchestrator {
 	return nomadOrchestrator{
-		client: client,
-		region: region,
+		client:  client,
+		region:  region,
+		lokiUrl: lokiUrl,
 	}
 }
 
@@ -28,11 +30,19 @@ func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId serv
 	if err != nil {
 		return service.ErrBuildImageSchedulation
 	}
+
+	return nil
 }
 
 func (n nomadOrchestrator) ScheduleBatchJob(ctx context.Context, jobId service.JobId, jobName, imageName string, args []string, envs map[string]string) (*api.JobRegisterResponse, error) {
 	task := api.NewTask(jobName, DriverDocker)
 	task.Env = envs
+	task.Config = map[string]interface{}{
+		"image":      imageName,
+		"args":       args,
+		"force_pull": true,
+		"logging":    loggingConfig(n.lokiUrl),
+	}
 
 	taskGroup := api.NewTaskGroup(jobName, 1)
 	taskGroup.AddTask(task)

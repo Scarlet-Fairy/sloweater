@@ -32,7 +32,7 @@ func (s basicService) ScheduleImageBuild(ctx context.Context, workloadId string,
 		return "", err
 	}
 
-	if err := s.orchestrator.ScheduleBuildImageJob(ctx, jobId, githubRepo); err != nil {
+	if err := s.orchestrator.ScheduleBuildImageJob(ctx, JobId(jobId), githubRepo); err != nil {
 		return "", err
 	}
 

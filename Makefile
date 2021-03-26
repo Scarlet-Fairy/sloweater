@@ -78,10 +78,11 @@ proto-build:
     		echo "error: protoc not installed" >&2; \
     		exit 1; \
 	fi
-	@go get -u -v github.com/golang/protobuf/protoc-gen-go
-	@for file in $$(git ls-files '*.proto'); do \
-		protoc -I $$(dirname $$file) --go_out=plugins=grpc:$$(dirname $$file) $$file; \
-	done
+	@go get -u  google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	protoc \
+		--go_out=. --go_opt=paths=source_relative \
+		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		pb/sloweater.proto
 
 docker-release:
 	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):latest

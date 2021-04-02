@@ -16,12 +16,11 @@ service Scheduler {
 message ScheduleImageBuildRequest {
   string workload_id  = 1;
   string git_repo_url = 2;
-  string region       = 3;
-  uint32 priority     = 4;
 }
 
 message ScheduleImageBuildResponse {
   string job_id = 1;
+  string error = 2;
 }
 
 message GetImageBuildStatusRequest {
@@ -45,7 +44,7 @@ message GetImageBuildStatusResponse {
       PUSH          = 3;
     }
     ImageBuildSteps step = 1;
-    string error = 2;
+    optional string error = 2;
   }
   repeated BuildStepStatus steps = 2;
 }

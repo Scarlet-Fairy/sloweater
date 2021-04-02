@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/go-kit/kit/log"
 )
 
 type Service interface {
@@ -13,10 +14,11 @@ type Service interface {
 	GetWorkloadStatus(ctx context.Context) error
 }
 
-func NewService(orchestrator Orchestrator, repository Repository) Service {
+func NewService(orchestrator Orchestrator, repository Repository, pubSub PubSub, logger log.Logger) Service {
 	return &basicService{
 		orchestrator: orchestrator,
 		repository:   repository,
+		pubsub:       pubSub,
 	}
 }
 

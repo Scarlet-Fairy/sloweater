@@ -6,7 +6,7 @@ SERVICE_PORT?=3000
 DOCKER_REGISTRY?=scarletfairy/#if set it should finished by /
 EXPORT_RESULT?=false # for CI please set EXPORT_RESULT to true
 BIN_FOLDER?=bin/
-MAIN_PATH?=cmd/cobold/main.go
+MAIN_PATH?=cmd/sloweater/main.go
 
 
 GREEN  := $(shell tput -Txterm setaf 2)
@@ -92,7 +92,8 @@ docker-release:
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):latest
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
 
-run: docker-run
+run:
+	@$(GOCMD) run $(MAIN_PATH)
 
 docker-run: docker-build
 	docker run --privileged --network host $(BINARY_NAME)

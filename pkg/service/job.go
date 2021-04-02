@@ -30,7 +30,12 @@ func (s Step) IsValid() bool {
 type Job struct {
 	Id     string
 	Status Status
-	Step   Step
+	Steps  []Steps
+}
+
+type Steps struct {
+	Step  Step
+	Error string
 }
 
 type JobId string
@@ -44,12 +49,6 @@ func (id JobId) NameImageBuild() string {
 	return fmt.Sprintf("%s.%s", JobTypeImageBuild, id)
 }
 
-func (id JobId) ImageName(registry *string) string {
-	imageName := fmt.Sprintf("%s/%s", NameImageBuilder, id)
-
-	if registry != nil {
-		return fmt.Sprintf("%s/%s", *registry, imageName)
-	}
-
-	return imageName
+func (id JobId) ImageName(registry string) string {
+	return fmt.Sprintf("%s/%s/%s", registry, NameImageBuilder, id)
 }

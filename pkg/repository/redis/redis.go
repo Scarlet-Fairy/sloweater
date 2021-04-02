@@ -36,7 +36,9 @@ func (r redisRepository) CreateJob(ctx context.Context) (string, error) {
 	job := service.Job{
 		Id:     uuid.NewString(),
 		Status: service.StatusLoading,
-		Step:   service.StepInit,
+		Steps: []service.Steps{
+			{Step: service.StepInit},
+		},
 	}
 
 	if err := r.client.Set(ctx, job.Id, job, 0).Err(); err != nil {
@@ -74,13 +76,16 @@ func (r redisRepository) ListJobs(ctx context.Context) ([]string, error) {
 	return jobsId.JobsId, nil
 }
 
-func (r redisRepository) SetJobStep(ctx context.Context, jobId string, step service.Step) error {
+func (r redisRepository) SetJobStep(ctx context.Context, jobId string, step service.Step, error *string) error {
 	job, err := r.GetJob(ctx, jobId)
 	if err != nil {
 		return err
 	}
 
-	job.Step = step
+	job.Steps = append(job.Steps, service.Steps{
+		Step:  step,
+		Error: *error,
+	})
 
 	if err := r.client.Set(ctx, jobId, job, 0).Err(); err != nil {
 		return errors.Wrap(err, "settings job")

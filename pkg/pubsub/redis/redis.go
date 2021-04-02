@@ -46,10 +46,14 @@ func (r redisPubSub) ListenImageBuildEvents(ctx context.Context, jobId string) e
 				return err
 			}
 
+			if err := r.repository.SetJobStep(ctx, jobId, msg.Topic, &msg.Error); err != nil {
+				return err
+			}
+
 			return errors.New(msg.Error)
 		}
 
-		if err := r.repository.SetJobStep(ctx, jobId, msg.Topic); err != nil {
+		if err := r.repository.SetJobStep(ctx, jobId, msg.Topic, nil); err != nil {
 			return err
 		}
 

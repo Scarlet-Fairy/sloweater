@@ -42,10 +42,13 @@ var (
 )
 
 type ScheduleImageBuildRequest struct {
+	WorkloadId string
+	GitRepoUrl string
 }
 
 type ScheduleImageBuildResponse struct {
-	Err error `json:"-"`
+	JobId string `json:"job_id"`
+	Err   error  `json:"-"`
 }
 
 func (r ScheduleImageBuildResponse) Failed() error {
@@ -54,32 +57,29 @@ func (r ScheduleImageBuildResponse) Failed() error {
 
 func makeScheduleImageBuildEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return ScheduleImageBuildResponse{}, nil
-	}
-}
+		req := request.(ScheduleImageBuildRequest)
+		jobId, err := s.ScheduleImageBuild(ctx, req.WorkloadId, req.GitRepoUrl)
 
-type GetScheduledImageBuildWorkloadsRequest struct {
-}
-
-type GetScheduledImageBuildWorkloadsResponse struct {
-	Err error `json:"-"`
-}
-
-func (r GetScheduledImageBuildWorkloadsResponse) Failed() error {
-	return r.Err
-}
-
-func makeGetScheduledImageBuildWorkloadsEndpoint(s Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return GetScheduledImageBuildWorkloadsResponse{}, nil
+		return ScheduleImageBuildResponse{
+			JobId: jobId,
+			Err:   err,
+		}, nil
 	}
 }
 
 type GetImageBuildStatusRequest struct {
+	JobId string
 }
 
 type GetImageBuildStatusResponse struct {
-	Err error `json:"-"`
+	Status Status                     `json:"status"`
+	Steps  []GetImageBuildStatusSteps `json:"steps"`
+	Err    error                      `json:"-"`
+}
+
+type GetImageBuildStatusSteps struct {
+	Step  Step   `json:"step"`
+	Error string `json:"error"`
 }
 
 func (r GetImageBuildStatusResponse) Failed() error {
@@ -89,5 +89,27 @@ func (r GetImageBuildStatusResponse) Failed() error {
 func makeGetImageBuildStatusEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		return GetImageBuildStatusResponse{}, nil
+	}
+}
+
+type GetScheduledImageBuildWorkloadsRequest struct {
+}
+
+type GetScheduledImageBuildWorkloadsResponse struct {
+	JobIds []string `json:"jobs"`
+	Err    error    `json:"-"`
+}
+
+func (r GetScheduledImageBuildWorkloadsResponse) Failed() error {
+	return r.Err
+}
+
+func makeGetScheduledImageBuildWorkloadsEndpoint(s Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		workloads, err := s.GetSchedulesImageBuildWorkloads(ctx)
+		return GetScheduledImageBuildWorkloadsResponse{
+			JobIds: workloads,
+			Err:    err,
+		}, nil
 	}
 }

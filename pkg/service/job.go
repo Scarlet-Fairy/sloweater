@@ -1,6 +1,9 @@
 package service
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type Status byte
 
@@ -28,14 +31,18 @@ func (s Step) IsValid() bool {
 }
 
 type Job struct {
-	Id     string
-	Status Status
-	Steps  []Steps
+	Id     string  `json:"id"`
+	Status Status  `json:"status"`
+	Steps  []Steps `json:"steps"`
 }
 
 type Steps struct {
-	Step  Step
-	Error string
+	Step  Step   `json:"step"`
+	Error string `json:"error"`
+}
+
+func (job Job) MarshalBinary() ([]byte, error) {
+	return json.Marshal(job)
 }
 
 type JobId string

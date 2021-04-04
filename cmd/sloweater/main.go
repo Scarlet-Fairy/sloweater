@@ -5,11 +5,12 @@ import (
 	"flag"
 	"github.com/Scarlet-Fairy/sloweater/pb"
 	"github.com/Scarlet-Fairy/sloweater/pkg/config/localStatic"
+	"github.com/Scarlet-Fairy/sloweater/pkg/endpoint"
 	nomadOrchestrator "github.com/Scarlet-Fairy/sloweater/pkg/orchestrator/nomad"
 	redisPubSub "github.com/Scarlet-Fairy/sloweater/pkg/pubsub/redis"
 	redisRepo "github.com/Scarlet-Fairy/sloweater/pkg/repository/redis"
 	"github.com/Scarlet-Fairy/sloweater/pkg/service"
-	"github.com/Scarlet-Fairy/sloweater/pkg/transport"
+	grpcTransport "github.com/Scarlet-Fairy/sloweater/pkg/transport/grpc"
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/go-redis/redis/v8"
@@ -30,8 +31,8 @@ func main() {
 		grpcAddr    = fs.String("grpc-addr", ":8082", "gRPC listen address")
 		redisUrl    = flag.String("redis-url", "redis://localhost:6379", "redis url where publish complete events")
 		registryUrl = flag.String("registry-url", "localhost:5000", "docker image registry url where cobold push builded images")
-		nomadUrl    = flag.String("nomad-url", "localhost:4646", "nomad api url")
-		consulUrl   = flag.String("consul-url", "localhost:8500", "consul api url")
+		nomadUrl    = flag.String("nomad-url", "http://localhost:4646", "nomad api url")
+		consulUrl   = flag.String("consul-url", "http://localhost:8500", "consul api url")
 		// tracingHost = flag.String("tracing-host", "localhost", "host where send traces")
 		// tracingPort = flag.String("tracing-port", "6831", "port of the host where send traces")
 	)
@@ -64,13 +65,13 @@ func main() {
 
 	configs := localStatic.NewConfig()
 
-	redisRepository := redisRepo.New(redisClient)
+	redisRepository := redisRepo.New(redisClient, log.With(logger, "component", "repository"))
 	redisPubSub := redisPubSub.New(redisClient, redisRepository)
-	nomadOrchestrator := nomadOrchestrator.New(nomadClient, *configs, *registryUrl)
+	nomadOrchestrator := nomadOrchestrator.New(nomadClient, *configs, log.With(logger, "component", "orchestrator"), *registryUrl)
 
-	svc := service.NewService(nomadOrchestrator, redisRepository, redisPubSub, logger)
-	endpoints := service.NewEndpoints(svc)
-	grpcServer := transport.NewGRPCServer(endpoints, logger)
+	svc := service.NewService(nomadOrchestrator, redisRepository, redisPubSub, log.With(logger, "component", "service"))
+	endpoints := endpoint.NewEndpoints(svc, log.With(logger, "component", "endpoint"))
+	grpcServer := grpcTransport.NewGRPCServer(endpoints, log.With(logger, "component", "transport"))
 
 	var g run.Group
 	{

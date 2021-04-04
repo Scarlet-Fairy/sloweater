@@ -2,7 +2,9 @@ package nomad
 
 import (
 	"context"
+	"github.com/Scarlet-Fairy/sloweater/pkg/orchestrator"
 	"github.com/Scarlet-Fairy/sloweater/pkg/service"
+	"github.com/go-kit/kit/log"
 	"github.com/hashicorp/nomad/api"
 )
 
@@ -14,14 +16,21 @@ type nomadOrchestrator struct {
 
 const (
 	DriverDocker = "docker"
+	CoboldImage  = "scarletfairy/cobold"
 )
 
-func New(client *api.Client, config service.Config, registryEndpoint string) service.Orchestrator {
-	return nomadOrchestrator{
-		client:           client,
-		config:           config,
-		registryEndpoint: registryEndpoint,
+func New(client *api.Client, config service.Config, logger log.Logger, registryEndpoint string) service.Orchestrator {
+	var orc service.Orchestrator
+	{
+		orc = nomadOrchestrator{
+			client:           client,
+			config:           config,
+			registryEndpoint: registryEndpoint,
+		}
+		orc = orchestrator.LoggingMiddleware(logger)(orc)
 	}
+
+	return orc
 }
 
 func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId service.JobId, githubRepo string) error {
@@ -29,12 +38,13 @@ func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId serv
 		ctx,
 		jobId,
 		jobId.NameImageBuild(),
-		jobId.ImageName(n.registryEndpoint),
+		CoboldImage,
 		n.imageBuilderArgs(string(jobId), githubRepo),
 		nil,
 	)
+
 	if err != nil {
-		return service.ErrBuildImageSchedulation
+		return err
 	}
 
 	return nil
@@ -42,7 +52,7 @@ func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId serv
 
 func (n nomadOrchestrator) imageBuilderArgs(jobId string, githubRepo string) []string {
 	return []string{
-		"--github-repo", githubRepo,
+		"--git-repo", githubRepo,
 		"--job-id", jobId,
 		"--dev", "false",
 	}
@@ -55,14 +65,23 @@ func (n nomadOrchestrator) ScheduleBatchJob(_ context.Context, jobId service.Job
 		"image":      imageName,
 		"args":       args,
 		"force_pull": true,
-		"logging":    loggingConfig(n.config.Orchestrate.Logging.LokiUrl),
+		/*"logging": []map[string]interface{}{
+			loggingConfig(n.config.Orchestrate.Logging.LokiUrl),
+		},*/
+	}
+	task.RestartPolicy = &api.RestartPolicy{
+		Attempts: &n.config.Orchestrate.RestartAttemps,
 	}
 
 	taskGroup := api.NewTaskGroup(jobName, 1)
 	taskGroup.AddTask(task)
+	taskGroup.ReschedulePolicy = &api.ReschedulePolicy{
+		Attempts: &n.config.Orchestrate.RestartAttemps,
+	}
 
 	job := api.NewBatchJob(string(jobId), jobName, n.config.Orchestrate.Region, n.config.Orchestrate.PriorityBatchJob)
 	job.AddTaskGroup(taskGroup)
+	job.Datacenters = n.config.Orchestrate.Datacenters
 
 	res, _, err := n.client.Jobs().Register(job, &api.WriteOptions{})
 

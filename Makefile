@@ -98,27 +98,11 @@ run:
 docker-run: docker-build
 	docker run --privileged --network host $(BINARY_NAME)
 
-run-jaeger:
-	docker run \
-	  --name jaeger \
-	  --rm \
-      -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
-      -p 5775:5775/udp \
-      -p 6831:6831/udp \
-      -p 6832:6832/udp \
-      -p 5778:5778 \
-      -p 16686:16686 \
-      -p 14268:14268 \
-      -p 14250:14250 \
-      -p 9411:9411 \
-      jaegertracing/all-in-one:1.21
+start-compose:
+	docker-compose -f ./deployment/docker-compose.yaml up -d
 
-run-registry:
-	docker run \
-	-p 5000:5000 \
-	--name registry \
-	--rm \
-	registry:2
+stop-compose:
+	docker-compose -f ./deployment/docker-compose.yaml down
 
 watch:
 	$(eval PACKAGE_NAME=$(shell head -n 1 go.mod | cut -d ' ' -f2))

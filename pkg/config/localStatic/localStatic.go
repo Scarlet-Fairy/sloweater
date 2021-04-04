@@ -10,6 +10,9 @@ func NewConfig() *service.Config {
 			},
 			Region:           "",
 			PriorityBatchJob: 50,
+			Datacenters: []string{
+				"dc1",
+			},
 		},
 	}
 }

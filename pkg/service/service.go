@@ -6,20 +6,26 @@ import (
 )
 
 type Service interface {
-	ScheduleImageBuild(ctx context.Context, workloadId, githubRepo string) (string, error)
-	GetImageBuildStatus(ctx context.Context, jobId string) (*Job, error)
-	GetSchedulesImageBuildWorkloads(ctx context.Context) ([]string, error)
+	ScheduleImageBuild(ctx context.Context, workloadId, githubRepo string) (jobId string, err error)
+	GetImageBuildStatus(ctx context.Context, jobId string) (job *Job, err error)
+	GetSchedulesImageBuildWorkloads(ctx context.Context) (jobIds []string, err error)
 
 	ScheduleWorkload(ctx context.Context) error
 	GetWorkloadStatus(ctx context.Context) error
 }
 
 func NewService(orchestrator Orchestrator, repository Repository, pubSub PubSub, logger log.Logger) Service {
-	return &basicService{
-		orchestrator: orchestrator,
-		repository:   repository,
-		pubsub:       pubSub,
+	var service Service
+	{
+		service = &basicService{
+			orchestrator: orchestrator,
+			repository:   repository,
+			pubsub:       pubSub,
+		}
+		service = LoggingMiddleware(logger)(service)
 	}
+
+	return service
 }
 
 type basicService struct {

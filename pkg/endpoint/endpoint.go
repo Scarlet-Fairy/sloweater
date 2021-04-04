@@ -1,8 +1,10 @@
-package service
+package endpoint
 
 import (
 	"context"
+	"github.com/Scarlet-Fairy/sloweater/pkg/service"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/log"
 )
 
 type SchedulerEndpoint struct {
@@ -11,20 +13,26 @@ type SchedulerEndpoint struct {
 	GetScheduledImageBuildWorkloads endpoint.Endpoint
 }
 
-func NewEndpoints(s Service) SchedulerEndpoint {
+func NewEndpoints(s service.Service, logger log.Logger) SchedulerEndpoint {
 	var scheduleImageBuildEndpoint endpoint.Endpoint
 	{
 		scheduleImageBuildEndpoint = makeScheduleImageBuildEndpoint(s)
+		scheduleImageBuildEndpoint = LoggingMiddleware(log.With(logger, "method", "ScheduleImageBuild"))(scheduleImageBuildEndpoint)
+		scheduleImageBuildEndpoint = UnwrapErrorMiddleware()(scheduleImageBuildEndpoint)
 	}
 
 	var getImageBuildStatusEndpoint endpoint.Endpoint
 	{
 		getImageBuildStatusEndpoint = makeGetImageBuildStatusEndpoint(s)
+		getImageBuildStatusEndpoint = LoggingMiddleware(log.With(logger, "method", "GetImageBuildStatus"))(getImageBuildStatusEndpoint)
+		getImageBuildStatusEndpoint = UnwrapErrorMiddleware()(getImageBuildStatusEndpoint)
 	}
 
 	var getScheduledImageBuildWorkloads endpoint.Endpoint
 	{
 		getScheduledImageBuildWorkloads = makeGetScheduledImageBuildWorkloadsEndpoint(s)
+		getScheduledImageBuildWorkloads = LoggingMiddleware(log.With(logger, "method", "GetSchedulesImageBuildWorkloads"))(getScheduledImageBuildWorkloads)
+		getScheduledImageBuildWorkloads = UnwrapErrorMiddleware()(getScheduledImageBuildWorkloads)
 	}
 
 	return SchedulerEndpoint{
@@ -55,7 +63,7 @@ func (r ScheduleImageBuildResponse) Failed() error {
 	return r.Err
 }
 
-func makeScheduleImageBuildEndpoint(s Service) endpoint.Endpoint {
+func makeScheduleImageBuildEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(ScheduleImageBuildRequest)
 		jobId, err := s.ScheduleImageBuild(ctx, req.WorkloadId, req.GitRepoUrl)
@@ -72,21 +80,21 @@ type GetImageBuildStatusRequest struct {
 }
 
 type GetImageBuildStatusResponse struct {
-	Status Status                     `json:"status"`
+	Status service.Status             `json:"status"`
 	Steps  []GetImageBuildStatusSteps `json:"steps"`
 	Err    error                      `json:"-"`
 }
 
 type GetImageBuildStatusSteps struct {
-	Step  Step   `json:"step"`
-	Error string `json:"error"`
+	Step  service.Step `json:"step"`
+	Error string       `json:"error"`
 }
 
 func (r GetImageBuildStatusResponse) Failed() error {
 	return r.Err
 }
 
-func makeGetImageBuildStatusEndpoint(s Service) endpoint.Endpoint {
+func makeGetImageBuildStatusEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		return GetImageBuildStatusResponse{}, nil
 	}
@@ -104,7 +112,7 @@ func (r GetScheduledImageBuildWorkloadsResponse) Failed() error {
 	return r.Err
 }
 
-func makeGetScheduledImageBuildWorkloadsEndpoint(s Service) endpoint.Endpoint {
+func makeGetScheduledImageBuildWorkloadsEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		workloads, err := s.GetSchedulesImageBuildWorkloads(ctx)
 		return GetScheduledImageBuildWorkloadsResponse{

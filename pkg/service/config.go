@@ -8,6 +8,8 @@ type OrchestrateConfig struct {
 	Logging          LoggingConfig
 	Region           string
 	PriorityBatchJob int
+	Datacenters      []string
+	RestartAttemps   int
 }
 
 type LoggingConfig struct {

@@ -3,7 +3,9 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"github.com/Scarlet-Fairy/sloweater/pkg/repository"
 	"github.com/Scarlet-Fairy/sloweater/pkg/service"
+	"github.com/go-kit/kit/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -26,10 +28,16 @@ type jobList struct {
 	JobsId []string `json:"jobs_id"`
 }
 
-func New(client *redis.Client) service.Repository {
-	return redisRepository{
-		client: client,
+func New(client *redis.Client, logger log.Logger) service.Repository {
+	var repo service.Repository
+	{
+		repo = redisRepository{
+			client: client,
+		}
+		repo = repository.LoggingMiddlware(logger)(repo)
 	}
+
+	return repo
 }
 
 func (r redisRepository) CreateJob(ctx context.Context) (string, error) {

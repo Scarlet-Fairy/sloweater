@@ -1,9 +1,9 @@
-package transport
+package grpc
 
 import (
 	"context"
 	"github.com/Scarlet-Fairy/sloweater/pb"
-	"github.com/Scarlet-Fairy/sloweater/pkg/service"
+	"github.com/Scarlet-Fairy/sloweater/pkg/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/transport"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
@@ -16,7 +16,7 @@ type grpcServer struct {
 	getScheduledImageBuildWorkloads grpctransport.Handler
 }
 
-func NewGRPCServer(enpoints service.SchedulerEndpoint, logger log.Logger) pb.SchedulerServer {
+func NewGRPCServer(enpoints endpoint.SchedulerEndpoint, logger log.Logger) pb.SchedulerServer {
 	options := []grpctransport.ServerOption{
 		grpctransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 	}
@@ -77,55 +77,4 @@ func (g grpcServer) ScheduleWorkload(ctx context.Context, request *pb.ScheduleWo
 
 func (g grpcServer) GetWorkloadStatus(ctx context.Context, request *pb.GetWorkloadStatusRequest) (*pb.GetWorkloadStatusResponse, error) {
 	panic("implement me")
-}
-
-func decodeScheduleImageBuildRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*pb.ScheduleImageBuildRequest)
-	return service.ScheduleImageBuildRequest{
-		GitRepoUrl: req.GitRepoUrl,
-	}, nil
-}
-
-func encodeScheduleImageBuildResponse(_ context.Context, resp interface{}) (interface{}, error) {
-	res := resp.(service.ScheduleImageBuildResponse)
-	return &pb.ScheduleImageBuildResponse{
-		JobId: res.JobId,
-	}, nil
-}
-
-func decodeGetImageBuildStatusRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*pb.GetImageBuildStatusRequest)
-	return service.GetImageBuildStatusRequest{
-		JobId: req.JobId,
-	}, nil
-}
-
-func encodeGetImageBuildStatusResponse(_ context.Context, resp interface{}) (interface{}, error) {
-	res := resp.(service.GetImageBuildStatusResponse)
-
-	grpcRes := &pb.GetImageBuildStatusResponse{
-		Status: pb.GetImageBuildStatusResponse_ImageBuildStatus(res.Status),
-		Steps:  []*pb.GetImageBuildStatusResponse_BuildStepStatus{},
-	}
-
-	for _, step := range res.Steps {
-		grpcRes.Steps = append(grpcRes.Steps, &pb.GetImageBuildStatusResponse_BuildStepStatus{
-			Step:  pb.GetImageBuildStatusResponse_BuildStepStatus_ImageBuildSteps(step.Step),
-			Error: &step.Error,
-		})
-	}
-
-	return grpcRes, nil
-}
-
-func decodeGetScheduledImageBuildWorkloadsRequest(_ context.Context, _ interface{}) (interface{}, error) {
-	return service.GetScheduledImageBuildWorkloadsRequest{}, nil
-}
-
-func encodeGetScheduledImageBuildWorkloadsResponse(_ context.Context, resp interface{}) (interface{}, error) {
-	res := resp.(service.GetScheduledImageBuildWorkloadsResponse)
-
-	return &pb.GetScheduledImageBuildWorkloadsResponse{
-		Jobs: res.JobIds,
-	}, nil
 }

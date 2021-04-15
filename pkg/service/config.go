@@ -10,8 +10,22 @@ type OrchestrateConfig struct {
 	PriorityBatchJob int
 	Datacenters      []string
 	RestartAttemps   int
+	ImageBuilder     ImageBuilderConfig
 }
 
 type LoggingConfig struct {
 	LokiUrl string
+}
+
+type ImageBuilderConfig struct {
+	Services ServicesConfig
+}
+
+type ServicesConfig struct {
+	RedisServiceName    string
+	RedisServicePort    int
+	RegistryServiceName string
+	RegistryServicePort int
+	LokiServiceName     string
+	LokiServicePort     int
 }

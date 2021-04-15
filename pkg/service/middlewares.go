@@ -21,13 +21,14 @@ type loggingMiddlware struct {
 	logger log.Logger
 }
 
-func (l *loggingMiddlware) ScheduleImageBuild(ctx context.Context, workloadId, githubRepo string) (jobId string, err error) {
+func (l *loggingMiddlware) ScheduleImageBuild(ctx context.Context, workloadId, githubRepo string) (jobName *string, imageName *string, err error) {
 	defer func() {
 		l.logger.Log(
 			"method", "ScheduleImageBuild",
 			"workloadId", workloadId,
 			"githubRepo", githubRepo,
-			"jobId", jobId,
+			"jobName", jobName,
+			"imageName", imageName,
 			"err", err,
 		)
 	}()
@@ -35,35 +36,6 @@ func (l *loggingMiddlware) ScheduleImageBuild(ctx context.Context, workloadId, g
 	return l.next.ScheduleImageBuild(ctx, workloadId, githubRepo)
 }
 
-func (l *loggingMiddlware) GetImageBuildStatus(ctx context.Context, jobId string) (job *Job, err error) {
-	defer func() {
-		l.logger.Log(
-			"method", "GetImageBuildStatus",
-			"jobId", jobId,
-			"job", job,
-			"err", err,
-		)
-	}()
-
-	return l.next.GetImageBuildStatus(ctx, jobId)
-}
-
-func (l *loggingMiddlware) GetSchedulesImageBuildWorkloads(ctx context.Context) (jobIds []string, err error) {
-	defer func() {
-		l.logger.Log(
-			"method", "GetScheduledImageBuildWorkloads",
-			"jobIds", jobIds,
-			"err", err,
-		)
-	}()
-
-	return l.next.GetSchedulesImageBuildWorkloads(ctx)
-}
-
 func (l *loggingMiddlware) ScheduleWorkload(ctx context.Context) error {
-	panic("implement me")
-}
-
-func (l *loggingMiddlware) GetWorkloadStatus(ctx context.Context) error {
 	panic("implement me")
 }

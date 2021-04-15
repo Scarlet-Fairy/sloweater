@@ -7,17 +7,13 @@ import (
 	"github.com/Scarlet-Fairy/sloweater/pkg/config/localStatic"
 	"github.com/Scarlet-Fairy/sloweater/pkg/endpoint"
 	nomadOrchestrator "github.com/Scarlet-Fairy/sloweater/pkg/orchestrator/nomad"
-	redisPubSub "github.com/Scarlet-Fairy/sloweater/pkg/pubsub/redis"
-	redisRepo "github.com/Scarlet-Fairy/sloweater/pkg/repository/redis"
 	"github.com/Scarlet-Fairy/sloweater/pkg/service"
 	grpcTransport "github.com/Scarlet-Fairy/sloweater/pkg/transport/grpc"
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	"github.com/go-redis/redis/v8"
 	consulApi "github.com/hashicorp/consul/api"
 	nomadApi "github.com/hashicorp/nomad/api"
 	"github.com/oklog/run"
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -29,7 +25,6 @@ func main() {
 	fs := flag.NewFlagSet("sloweater", flag.ExitOnError)
 	var (
 		grpcAddr    = fs.String("grpc-addr", ":8082", "gRPC listen address")
-		redisUrl    = flag.String("redis-url", "redis://localhost:6379", "redis url where publish complete events")
 		registryUrl = flag.String("registry-url", "localhost:5000", "docker image registry url where cobold push builded images")
 		nomadUrl    = flag.String("nomad-url", "http://localhost:4646", "nomad api url")
 		consulUrl   = flag.String("consul-url", "http://localhost:8500", "consul api url")
@@ -43,12 +38,6 @@ func main() {
 		logger = log.NewLogfmtLogger(os.Stderr)
 		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 		logger = log.With(logger, "caller", log.DefaultCaller)
-	}
-
-	redisClient, err := newRedisClient(*redisUrl)
-	if err != nil {
-		logger.Log("err", err.Error(), "msg", "Unable to connect to redis", "redis-url", *redisUrl)
-		os.Exit(1)
 	}
 
 	nomadClient, err := newNomadClient(*nomadUrl)
@@ -65,11 +54,9 @@ func main() {
 
 	configs := localStatic.NewConfig()
 
-	redisRepository := redisRepo.New(redisClient, log.With(logger, "component", "repository"))
-	redisPubSub := redisPubSub.New(redisClient, redisRepository)
 	nomadOrchestrator := nomadOrchestrator.New(nomadClient, *configs, log.With(logger, "component", "orchestrator"), *registryUrl)
 
-	svc := service.NewService(nomadOrchestrator, redisRepository, redisPubSub, log.With(logger, "component", "service"))
+	svc := service.NewService(nomadOrchestrator, log.With(logger, "component", "service"))
 	endpoints := endpoint.NewEndpoints(svc, log.With(logger, "component", "endpoint"))
 	grpcServer := grpcTransport.NewGRPCServer(endpoints, log.With(logger, "component", "transport"))
 
@@ -83,7 +70,9 @@ func main() {
 		g.Add(func() error {
 			logger.Log("transport", "gRPC", "addr", *grpcAddr)
 
-			baseServer := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
+			baseServer := grpc.NewServer(
+				grpc.UnaryInterceptor(kitgrpc.Interceptor),
+			)
 			pb.RegisterSchedulerServer(baseServer, grpcServer)
 			return baseServer.Serve(grpcListener)
 		}, func(err error) {
@@ -92,21 +81,6 @@ func main() {
 	}
 
 	logger.Log("exit", g.Run())
-}
-
-func newRedisClient(url string) (*redis.Client, error) {
-	options, err := redis.ParseURL(url)
-	if err != nil {
-		return nil, errors.Wrap(err, "redis client")
-	}
-
-	client := redis.NewClient(options)
-
-	if err := client.Ping(ctx).Err(); err != nil {
-		return nil, errors.New("unable to connect to redis")
-	}
-
-	return client, nil
 }
 
 func newNomadClient(url string) (*nomadApi.Client, error) {

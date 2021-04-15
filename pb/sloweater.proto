@@ -6,11 +6,7 @@ option go_package="pb/";
 
 service Scheduler {
   rpc ScheduleImageBuild (ScheduleImageBuildRequest) returns (ScheduleImageBuildResponse) {}
-  rpc GetImageBuildStatus (GetImageBuildStatusRequest) returns (GetImageBuildStatusResponse) {}
-  rpc GetScheduledImageBuildWorkloads (GetScheduledImageBuildWorkloadsRequest) returns (GetScheduledImageBuildWorkloadsResponse)  {}
-
   rpc ScheduleWorkload (ScheduleWorkloadRequest) returns (ScheduleWorkloadResponse) {}
-  rpc GetWorkloadStatus (GetWorkloadStatusRequest) returns (GetWorkloadStatusResponse) {}
 }
 
 message ScheduleImageBuildRequest {
@@ -19,58 +15,22 @@ message ScheduleImageBuildRequest {
 }
 
 message ScheduleImageBuildResponse {
-  string job_id = 1;
-  string error = 2;
+  string job_name = 1;
+  string image_name = 2;
+  string error = 3;
 }
-
-message GetImageBuildStatusRequest {
-  string job_id = 1;
-}
-
-message GetImageBuildStatusResponse {
-  enum ImageBuildStatus {
-    UNKNOWN_STATUS  = 0;
-    ERROR           = 1;
-    LOADING         = 2;
-    COMPLETED       = 3;
-  }
-  ImageBuildStatus status = 1;
-
-  message BuildStepStatus {
-    enum ImageBuildSteps {
-      UNKNOWN_STEP  = 0;
-      CLONE         = 1;
-      BUILD         = 2;
-      PUSH          = 3;
-    }
-    ImageBuildSteps step = 1;
-    optional string error = 2;
-  }
-  repeated BuildStepStatus steps = 2;
-}
-
-message GetScheduledImageBuildWorkloadsRequest {
-
-}
-
-message GetScheduledImageBuildWorkloadsResponse {
-  repeated string jobs = 1;
-}
-
-/* ------------------------------------ */
 
 message ScheduleWorkloadRequest {
+  message EnvVar {
+    string key = 1;
+    string value = 2;
+  }
+
+  repeated EnvVar envs = 1;
+  string image_name = 2;
 
 }
 
 message ScheduleWorkloadResponse {
-
-}
-
-message GetWorkloadStatusRequest {
-  string job_id = 1;
-}
-
-message GetWorkloadStatusResponse {
 
 }

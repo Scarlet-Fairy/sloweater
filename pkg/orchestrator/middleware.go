@@ -22,9 +22,16 @@ type loggingMiddleware struct {
 	logger log.Logger
 }
 
-func (l *loggingMiddleware) ScheduleBuildImageJob(ctx context.Context, jobId service.JobId, githubRepo string) (err error) {
+func (l *loggingMiddleware) ScheduleBuildImageJob(ctx context.Context, jobId service.WorkloadId, githubRepo string) (jobName *string, imageName *string, err error) {
 	defer func() {
-		l.logger.Log("method", "ScheduleBuildImageJob", "jobId", jobId, "githubRepo", githubRepo, "err", err)
+		l.logger.Log(
+			"method", "ScheduleBuildImageJob",
+			"jobId", jobId,
+			"githubRepo", githubRepo,
+			"jobName", jobName,
+			"imageName", imageName,
+			"err", err,
+		)
 	}()
 
 	return l.next.ScheduleBuildImageJob(ctx, jobId, githubRepo)

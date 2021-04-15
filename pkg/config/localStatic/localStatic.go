@@ -13,6 +13,14 @@ func NewConfig() *service.Config {
 			Datacenters: []string{
 				"dc1",
 			},
+			ImageBuilder: service.ImageBuilderConfig{
+				Services: service.ServicesConfig{
+					RedisServiceName:    "redis",
+					RedisServicePort:    10001,
+					RegistryServiceName: "image-registry",
+					RegistryServicePort: 10002,
+				},
+			},
 		},
 	}
 }

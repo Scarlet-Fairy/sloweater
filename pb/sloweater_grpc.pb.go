@@ -19,10 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SchedulerClient interface {
 	ScheduleImageBuild(ctx context.Context, in *ScheduleImageBuildRequest, opts ...grpc.CallOption) (*ScheduleImageBuildResponse, error)
-	GetImageBuildStatus(ctx context.Context, in *GetImageBuildStatusRequest, opts ...grpc.CallOption) (*GetImageBuildStatusResponse, error)
-	GetScheduledImageBuildWorkloads(ctx context.Context, in *GetScheduledImageBuildWorkloadsRequest, opts ...grpc.CallOption) (*GetScheduledImageBuildWorkloadsResponse, error)
 	ScheduleWorkload(ctx context.Context, in *ScheduleWorkloadRequest, opts ...grpc.CallOption) (*ScheduleWorkloadResponse, error)
-	GetWorkloadStatus(ctx context.Context, in *GetWorkloadStatusRequest, opts ...grpc.CallOption) (*GetWorkloadStatusResponse, error)
 }
 
 type schedulerClient struct {
@@ -42,36 +39,9 @@ func (c *schedulerClient) ScheduleImageBuild(ctx context.Context, in *ScheduleIm
 	return out, nil
 }
 
-func (c *schedulerClient) GetImageBuildStatus(ctx context.Context, in *GetImageBuildStatusRequest, opts ...grpc.CallOption) (*GetImageBuildStatusResponse, error) {
-	out := new(GetImageBuildStatusResponse)
-	err := c.cc.Invoke(ctx, "/protobuf.Scheduler/GetImageBuildStatus", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *schedulerClient) GetScheduledImageBuildWorkloads(ctx context.Context, in *GetScheduledImageBuildWorkloadsRequest, opts ...grpc.CallOption) (*GetScheduledImageBuildWorkloadsResponse, error) {
-	out := new(GetScheduledImageBuildWorkloadsResponse)
-	err := c.cc.Invoke(ctx, "/protobuf.Scheduler/GetScheduledImageBuildWorkloads", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *schedulerClient) ScheduleWorkload(ctx context.Context, in *ScheduleWorkloadRequest, opts ...grpc.CallOption) (*ScheduleWorkloadResponse, error) {
 	out := new(ScheduleWorkloadResponse)
 	err := c.cc.Invoke(ctx, "/protobuf.Scheduler/ScheduleWorkload", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *schedulerClient) GetWorkloadStatus(ctx context.Context, in *GetWorkloadStatusRequest, opts ...grpc.CallOption) (*GetWorkloadStatusResponse, error) {
-	out := new(GetWorkloadStatusResponse)
-	err := c.cc.Invoke(ctx, "/protobuf.Scheduler/GetWorkloadStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,10 +53,7 @@ func (c *schedulerClient) GetWorkloadStatus(ctx context.Context, in *GetWorkload
 // for forward compatibility
 type SchedulerServer interface {
 	ScheduleImageBuild(context.Context, *ScheduleImageBuildRequest) (*ScheduleImageBuildResponse, error)
-	GetImageBuildStatus(context.Context, *GetImageBuildStatusRequest) (*GetImageBuildStatusResponse, error)
-	GetScheduledImageBuildWorkloads(context.Context, *GetScheduledImageBuildWorkloadsRequest) (*GetScheduledImageBuildWorkloadsResponse, error)
 	ScheduleWorkload(context.Context, *ScheduleWorkloadRequest) (*ScheduleWorkloadResponse, error)
-	GetWorkloadStatus(context.Context, *GetWorkloadStatusRequest) (*GetWorkloadStatusResponse, error)
 	mustEmbedUnimplementedSchedulerServer()
 }
 
@@ -97,17 +64,8 @@ type UnimplementedSchedulerServer struct {
 func (UnimplementedSchedulerServer) ScheduleImageBuild(context.Context, *ScheduleImageBuildRequest) (*ScheduleImageBuildResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ScheduleImageBuild not implemented")
 }
-func (UnimplementedSchedulerServer) GetImageBuildStatus(context.Context, *GetImageBuildStatusRequest) (*GetImageBuildStatusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetImageBuildStatus not implemented")
-}
-func (UnimplementedSchedulerServer) GetScheduledImageBuildWorkloads(context.Context, *GetScheduledImageBuildWorkloadsRequest) (*GetScheduledImageBuildWorkloadsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetScheduledImageBuildWorkloads not implemented")
-}
 func (UnimplementedSchedulerServer) ScheduleWorkload(context.Context, *ScheduleWorkloadRequest) (*ScheduleWorkloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ScheduleWorkload not implemented")
-}
-func (UnimplementedSchedulerServer) GetWorkloadStatus(context.Context, *GetWorkloadStatusRequest) (*GetWorkloadStatusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetWorkloadStatus not implemented")
 }
 func (UnimplementedSchedulerServer) mustEmbedUnimplementedSchedulerServer() {}
 
@@ -140,42 +98,6 @@ func _Scheduler_ScheduleImageBuild_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Scheduler_GetImageBuildStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetImageBuildStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SchedulerServer).GetImageBuildStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protobuf.Scheduler/GetImageBuildStatus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SchedulerServer).GetImageBuildStatus(ctx, req.(*GetImageBuildStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Scheduler_GetScheduledImageBuildWorkloads_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetScheduledImageBuildWorkloadsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SchedulerServer).GetScheduledImageBuildWorkloads(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protobuf.Scheduler/GetScheduledImageBuildWorkloads",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SchedulerServer).GetScheduledImageBuildWorkloads(ctx, req.(*GetScheduledImageBuildWorkloadsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Scheduler_ScheduleWorkload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ScheduleWorkloadRequest)
 	if err := dec(in); err != nil {
@@ -194,24 +116,6 @@ func _Scheduler_ScheduleWorkload_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Scheduler_GetWorkloadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetWorkloadStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SchedulerServer).GetWorkloadStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/protobuf.Scheduler/GetWorkloadStatus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SchedulerServer).GetWorkloadStatus(ctx, req.(*GetWorkloadStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Scheduler_ServiceDesc is the grpc.ServiceDesc for Scheduler service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -224,20 +128,8 @@ var Scheduler_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Scheduler_ScheduleImageBuild_Handler,
 		},
 		{
-			MethodName: "GetImageBuildStatus",
-			Handler:    _Scheduler_GetImageBuildStatus_Handler,
-		},
-		{
-			MethodName: "GetScheduledImageBuildWorkloads",
-			Handler:    _Scheduler_GetScheduledImageBuildWorkloads_Handler,
-		},
-		{
 			MethodName: "ScheduleWorkload",
 			Handler:    _Scheduler_ScheduleWorkload_Handler,
-		},
-		{
-			MethodName: "GetWorkloadStatus",
-			Handler:    _Scheduler_GetWorkloadStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

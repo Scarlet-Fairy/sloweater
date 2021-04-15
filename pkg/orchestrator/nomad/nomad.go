@@ -2,6 +2,7 @@ package nomad
 
 import (
 	"context"
+	"fmt"
 	"github.com/Scarlet-Fairy/sloweater/pkg/orchestrator"
 	"github.com/Scarlet-Fairy/sloweater/pkg/service"
 	"github.com/go-kit/kit/log"
@@ -33,7 +34,7 @@ func New(client *api.Client, config service.Config, logger log.Logger, registryE
 	return orc
 }
 
-func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId service.JobId, githubRepo string) error {
+func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId service.WorkloadId, githubRepo string) (*string, *string, error) {
 	_, err := n.ScheduleBatchJob(
 		ctx,
 		jobId,
@@ -41,13 +42,19 @@ func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId serv
 		CoboldImage,
 		n.imageBuilderArgs(string(jobId), githubRepo),
 		nil,
+		[]*api.Service{
+			n.imageBuilderServiceSettings(string(jobId)),
+		},
 	)
 
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	return nil
+	jobName := jobId.NameImageBuild()
+	imageName := jobId.ImageName(n.registryEndpoint)
+
+	return &jobName, &imageName, nil
 }
 
 func (n nomadOrchestrator) imageBuilderArgs(jobId string, githubRepo string) []string {
@@ -55,10 +62,41 @@ func (n nomadOrchestrator) imageBuilderArgs(jobId string, githubRepo string) []s
 		"--git-repo", githubRepo,
 		"--job-id", jobId,
 		"--dev", "false",
+		"--redis-url", fmt.Sprintf("localhost:%s", n.config.Orchestrate.ImageBuilder.Services.RedisServicePort),
+		"--registry-url", fmt.Sprintf("http://localhost:%s", n.config.Orchestrate.ImageBuilder.Services.RegistryServicePort),
 	}
 }
 
-func (n nomadOrchestrator) ScheduleBatchJob(_ context.Context, jobId service.JobId, jobName, imageName string, args []string, envs map[string]string) (*api.JobRegisterResponse, error) {
+func (n nomadOrchestrator) imageBuilderServiceSettings(id string) *api.Service {
+	return &api.Service{
+		Name: id,
+		Connect: &api.ConsulConnect{
+			SidecarService: &api.ConsulSidecarService{
+				Proxy: &api.ConsulProxy{
+					Upstreams: []*api.ConsulUpstream{
+						{
+							DestinationName: n.config.Orchestrate.ImageBuilder.Services.RedisServiceName,
+							LocalBindPort:   n.config.Orchestrate.ImageBuilder.Services.RedisServicePort,
+						},
+						{
+							DestinationName: n.config.Orchestrate.ImageBuilder.Services.RegistryServiceName,
+							LocalBindPort:   n.config.Orchestrate.ImageBuilder.Services.RegistryServicePort,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func (n nomadOrchestrator) ScheduleBatchJob(
+	_ context.Context,
+	jobId service.WorkloadId,
+	jobName, imageName string,
+	args []string,
+	envs map[string]string,
+	services []*api.Service,
+) (*api.JobRegisterResponse, error) {
 	task := api.NewTask(jobName, DriverDocker)
 	task.Env = envs
 	task.Config = map[string]interface{}{
@@ -78,8 +116,19 @@ func (n nomadOrchestrator) ScheduleBatchJob(_ context.Context, jobId service.Job
 	taskGroup.ReschedulePolicy = &api.ReschedulePolicy{
 		Attempts: &n.config.Orchestrate.RestartAttemps,
 	}
+	taskGroup.Services = services
+	taskGroup.Networks = []*api.NetworkResource{
+		{
+			Mode: "bridge",
+		},
+	}
 
-	job := api.NewBatchJob(string(jobId), jobName, n.config.Orchestrate.Region, n.config.Orchestrate.PriorityBatchJob)
+	job := api.NewBatchJob(
+		string(jobId),
+		jobName,
+		n.config.Orchestrate.Region,
+		n.config.Orchestrate.PriorityBatchJob,
+	)
 	job.AddTaskGroup(taskGroup)
 	job.Datacenters = n.config.Orchestrate.Datacenters
 

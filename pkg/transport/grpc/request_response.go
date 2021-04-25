@@ -21,3 +21,15 @@ func encodeScheduleImageBuildResponse(_ context.Context, resp interface{}) (inte
 		ImageName: *res.ImageName,
 	}, nil
 }
+
+func decodeScheduleWorkloadRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	req := grpcReq.(*pb.ScheduleWorkloadRequest)
+	return &endpoint.ScheduleWorkloadRequest{
+		WorkloadId: req.WorkloadId,
+		Envs:       req.Envs,
+	}, nil
+}
+
+func encodeScheduleWorkloadResponse(_ context.Context, resp interface{}) (interface{}, error) {
+	return &pb.ScheduleWorkloadResponse{}, nil
+}

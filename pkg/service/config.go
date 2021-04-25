@@ -5,12 +5,13 @@ type Config struct {
 }
 
 type OrchestrateConfig struct {
-	Logging          LoggingConfig
-	Region           string
-	PriorityBatchJob int
-	Datacenters      []string
-	RestartAttemps   int
-	ImageBuilder     ImageBuilderConfig
+	Logging             LoggingConfig
+	Region              string
+	PriorityBatchJob    int
+	PriorityWorkloadJob int
+	Datacenters         []string
+	RestartAttemps      int
+	ImageBuilder        ImageBuilderConfig
 }
 
 type LoggingConfig struct {

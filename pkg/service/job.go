@@ -48,12 +48,17 @@ func (job Job) MarshalBinary() ([]byte, error) {
 type WorkloadId string
 
 const (
-	JobTypeImageBuild = "ImageBuild"
+	JobTypeImageBuild = "imagebuild"
+	JobTypeWorkload   = "workload"
 	NameImageBuilder  = "cobold"
 )
 
 func (id WorkloadId) NameImageBuild() string {
 	return fmt.Sprintf("%s.%s", JobTypeImageBuild, id)
+}
+
+func (id WorkloadId) NameWorkload() string {
+	return fmt.Sprintf("%s.%s", JobTypeWorkload, id)
 }
 
 func (id WorkloadId) ImageName(registry string) string {

@@ -23,7 +23,7 @@ const (
 func New(client *api.Client, config service.Config, logger log.Logger, registryEndpoint string) service.Orchestrator {
 	var orc service.Orchestrator
 	{
-		orc = nomadOrchestrator{
+		orc = &nomadOrchestrator{
 			client:           client,
 			config:           config,
 			registryEndpoint: registryEndpoint,
@@ -34,19 +34,20 @@ func New(client *api.Client, config service.Config, logger log.Logger, registryE
 	return orc
 }
 
-func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId service.WorkloadId, githubRepo string) (*string, *string, error) {
+func (n *nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId service.WorkloadId, githubRepo string) (*string, *string, error) {
 	_, err := n.ScheduleBatchJob(
 		ctx,
 		jobId,
 		jobId.NameImageBuild(),
 		CoboldImage,
 		n.imageBuilderArgs(string(jobId), githubRepo),
-		nil,
+		map[string]string{
+			//"DEV": "true",
+		},
 		[]*api.Service{
-			n.imageBuilderServiceSettings(string(jobId)),
+			n.imageBuilderServices(string(jobId)),
 		},
 	)
-
 	if err != nil {
 		return nil, nil, err
 	}
@@ -57,17 +58,16 @@ func (n nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId serv
 	return &jobName, &imageName, nil
 }
 
-func (n nomadOrchestrator) imageBuilderArgs(jobId string, githubRepo string) []string {
+func (n *nomadOrchestrator) imageBuilderArgs(jobId string, githubRepo string) []string {
 	return []string{
 		"--git-repo", githubRepo,
 		"--job-id", jobId,
-		"--dev", "false",
-		"--redis-url", fmt.Sprintf("localhost:%s", n.config.Orchestrate.ImageBuilder.Services.RedisServicePort),
-		"--registry-url", fmt.Sprintf("http://localhost:%s", n.config.Orchestrate.ImageBuilder.Services.RegistryServicePort),
+		"--docker-registry", fmt.Sprintf("localhost:%d", n.config.Orchestrate.ImageBuilder.Services.RegistryServicePort),
+		"--redis-url", fmt.Sprintf("redis://localhost:%d", n.config.Orchestrate.ImageBuilder.Services.RedisServicePort),
 	}
 }
 
-func (n nomadOrchestrator) imageBuilderServiceSettings(id string) *api.Service {
+func (n *nomadOrchestrator) imageBuilderServices(id string) *api.Service {
 	return &api.Service{
 		Name: id,
 		Connect: &api.ConsulConnect{
@@ -89,7 +89,7 @@ func (n nomadOrchestrator) imageBuilderServiceSettings(id string) *api.Service {
 	}
 }
 
-func (n nomadOrchestrator) ScheduleBatchJob(
+func (n *nomadOrchestrator) ScheduleBatchJob(
 	_ context.Context,
 	jobId service.WorkloadId,
 	jobName, imageName string,
@@ -103,6 +103,9 @@ func (n nomadOrchestrator) ScheduleBatchJob(
 		"image":      imageName,
 		"args":       args,
 		"force_pull": true,
+		"volumes": []string{
+			"/var/run/docker.sock:/var/run/docker.sock",
+		},
 		/*"logging": []map[string]interface{}{
 			loggingConfig(n.config.Orchestrate.Logging.LokiUrl),
 		},*/
@@ -135,4 +138,46 @@ func (n nomadOrchestrator) ScheduleBatchJob(
 	res, _, err := n.client.Jobs().Register(job, &api.WriteOptions{})
 
 	return res, err
+}
+
+func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) error {
+	task := api.NewTask(workloadId.NameWorkload(), DriverDocker)
+	task.Env = envs
+	task.Config = map[string]interface{}{
+		"image":      workloadId.ImageName(n.registryEndpoint),
+		"force_pull": true,
+	}
+	task.RestartPolicy = &api.RestartPolicy{
+		Attempts: &n.config.Orchestrate.RestartAttemps,
+	}
+
+	taskGroup := api.NewTaskGroup(workloadId.NameWorkload(), 1)
+	taskGroup.AddTask(task)
+	taskGroup.Networks = []*api.NetworkResource{
+		{
+			Mode: "bridge",
+		},
+	}
+
+	job := api.NewServiceJob(
+		string(workloadId),
+		workloadId.NameWorkload(),
+		n.config.Orchestrate.Region,
+		n.config.Orchestrate.PriorityWorkloadJob,
+	)
+	job.AddTaskGroup(taskGroup)
+	job.Datacenters = n.config.Orchestrate.Datacenters
+
+	_, _, err := n.client.Jobs().Register(job, &api.WriteOptions{})
+
+	return err
+}
+
+func (n nomadOrchestrator) DeleteJob(_ context.Context, jobId string) error {
+	_, _, err := n.client.Jobs().Deregister(jobId, true, &api.WriteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

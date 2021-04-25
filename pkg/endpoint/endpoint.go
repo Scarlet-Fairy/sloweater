@@ -9,6 +9,7 @@ import (
 
 type SchedulerEndpoint struct {
 	ScheduleImageBuildEndpoint endpoint.Endpoint
+	ScheduleWorkloadEndpoint   endpoint.Endpoint
 }
 
 func NewEndpoints(s service.Service, logger log.Logger) SchedulerEndpoint {
@@ -19,8 +20,16 @@ func NewEndpoints(s service.Service, logger log.Logger) SchedulerEndpoint {
 		scheduleImageBuildEndpoint = UnwrapErrorMiddleware()(scheduleImageBuildEndpoint)
 	}
 
+	var scheduleWorkloadEndpoint endpoint.Endpoint
+	{
+		scheduleWorkloadEndpoint = makeScheduleWorkloadEndpoint(s)
+		scheduleWorkloadEndpoint = LoggingMiddleware(log.With(logger, "method", "ScheduleWorkload"))(scheduleWorkloadEndpoint)
+		scheduleWorkloadEndpoint = UnwrapErrorMiddleware()(scheduleWorkloadEndpoint)
+	}
+
 	return SchedulerEndpoint{
 		ScheduleImageBuildEndpoint: scheduleImageBuildEndpoint,
+		ScheduleWorkloadEndpoint:   scheduleWorkloadEndpoint,
 	}
 }
 
@@ -45,7 +54,7 @@ func (r ScheduleImageBuildResponse) Failed() error {
 }
 
 func makeScheduleImageBuildEndpoint(s service.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ScheduleImageBuildRequest)
 		jobName, imageName, err := s.ScheduleImageBuild(ctx, req.WorkloadId, req.GitRepoUrl)
 
@@ -53,6 +62,30 @@ func makeScheduleImageBuildEndpoint(s service.Service) endpoint.Endpoint {
 			JobName:   jobName,
 			ImageName: imageName,
 			Err:       err,
+		}, nil
+	}
+}
+
+type ScheduleWorkloadRequest struct {
+	WorkloadId string
+	Envs       map[string]string
+}
+
+type ScheduleWorkloadResponse struct {
+	Err error `json:"-"`
+}
+
+func (r ScheduleWorkloadResponse) Failed() error {
+	return r.Err
+}
+
+func makeScheduleWorkloadEndpoint(s service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(ScheduleWorkloadRequest)
+		err := s.ScheduleWorkload(ctx, req.WorkloadId, req.Envs)
+
+		return ScheduleWorkloadResponse{
+			Err: err,
 		}, nil
 	}
 }

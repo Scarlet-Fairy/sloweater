@@ -96,13 +96,7 @@ run:
 	@$(GOCMD) run $(MAIN_PATH)
 
 docker-run: docker-build
-	docker run --privileged --network host $(BINARY_NAME)
-
-start-compose:
-	docker-compose -f ./deployment/docker-compose.yaml up -d
-
-stop-compose:
-	docker-compose -f ./deployment/docker-compose.yaml down
+	docker run --network host $(BINARY_NAME)
 
 watch:
 	$(eval PACKAGE_NAME=$(shell head -n 1 go.mod | cut -d ' ' -f2))

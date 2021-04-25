@@ -4,9 +4,9 @@ go 1.15
 
 require (
 	github.com/go-kit/kit v0.10.0
-	github.com/go-redis/redis/v8 v8.7.1
+	github.com/go-redis/redis/v8 v8.7.1 // indirect
 	github.com/golang/protobuf v1.5.1 // indirect
-	github.com/google/uuid v1.2.0
+	github.com/google/uuid v1.2.0 // indirect
 	github.com/hashicorp/consul/api v1.8.1
 	github.com/hashicorp/nomad/api v0.0.0-20210323130814-4484d361eeff
 	github.com/oklog/run v1.1.0

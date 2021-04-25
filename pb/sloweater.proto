@@ -21,13 +21,8 @@ message ScheduleImageBuildResponse {
 }
 
 message ScheduleWorkloadRequest {
-  message EnvVar {
-    string key = 1;
-    string value = 2;
-  }
-
-  repeated EnvVar envs = 1;
-  string image_name = 2;
+  map<string, string> envs = 1;
+  string workload_id = 2;
 
 }
 

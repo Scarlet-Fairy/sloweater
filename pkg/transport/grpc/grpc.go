@@ -12,18 +12,25 @@ import (
 type grpcServer struct {
 	pb.UnimplementedSchedulerServer
 	scheduleImageBuild grpctransport.Handler
+	scheduleWorkload   grpctransport.Handler
 }
 
-func NewGRPCServer(enpoints endpoint.SchedulerEndpoint, logger log.Logger) pb.SchedulerServer {
+func NewGRPCServer(endpoints endpoint.SchedulerEndpoint, logger log.Logger) pb.SchedulerServer {
 	options := []grpctransport.ServerOption{
 		grpctransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 	}
 
 	return &grpcServer{
 		scheduleImageBuild: grpctransport.NewServer(
-			enpoints.ScheduleImageBuildEndpoint,
+			endpoints.ScheduleImageBuildEndpoint,
 			decodeScheduleImageBuildRequest,
 			encodeScheduleImageBuildResponse,
+			options...,
+		),
+		scheduleWorkload: grpctransport.NewServer(
+			endpoints.ScheduleWorkloadEndpoint,
+			decodeScheduleWorkloadRequest,
+			encodeScheduleWorkloadResponse,
 			options...,
 		),
 	}
@@ -40,5 +47,10 @@ func (g grpcServer) ScheduleImageBuild(ctx context.Context, request *pb.Schedule
 }
 
 func (g grpcServer) ScheduleWorkload(ctx context.Context, request *pb.ScheduleWorkloadRequest) (*pb.ScheduleWorkloadResponse, error) {
-	panic("implement me")
+	_, resp, err := g.scheduleWorkload.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*pb.ScheduleWorkloadResponse), nil
 }

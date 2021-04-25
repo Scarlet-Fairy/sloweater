@@ -18,7 +18,7 @@ func NewConfig() *service.Config {
 					RedisServiceName:    "redis",
 					RedisServicePort:    10001,
 					RegistryServiceName: "image-registry",
-					RegistryServicePort: 10002,
+					RegistryServicePort: 5000,
 				},
 			},
 		},

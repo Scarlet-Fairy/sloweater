@@ -4,6 +4,11 @@ job "registry" {
   group "registry" {
     network {
       mode = "bridge"
+
+      port "registry" {
+        to = 5000
+        static = 5000
+      }
     }
 
     service {

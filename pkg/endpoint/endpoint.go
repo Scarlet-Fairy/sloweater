@@ -10,6 +10,7 @@ import (
 type SchedulerEndpoint struct {
 	ScheduleImageBuildEndpoint endpoint.Endpoint
 	ScheduleWorkloadEndpoint   endpoint.Endpoint
+	UnScheduleJobEndpoint      endpoint.Endpoint
 }
 
 func NewEndpoints(s service.Service, logger log.Logger) SchedulerEndpoint {
@@ -27,9 +28,17 @@ func NewEndpoints(s service.Service, logger log.Logger) SchedulerEndpoint {
 		scheduleWorkloadEndpoint = UnwrapErrorMiddleware()(scheduleWorkloadEndpoint)
 	}
 
+	var unScheduleJobEnpoint endpoint.Endpoint
+	{
+		unScheduleJobEnpoint = makeUnScheduleJobEndpoint(s)
+		unScheduleJobEnpoint = LoggingMiddleware(log.With(logger, "method", "UnScheduleJob"))(unScheduleJobEnpoint)
+		unScheduleJobEnpoint = UnwrapErrorMiddleware()(unScheduleJobEnpoint)
+	}
+
 	return SchedulerEndpoint{
 		ScheduleImageBuildEndpoint: scheduleImageBuildEndpoint,
 		ScheduleWorkloadEndpoint:   scheduleWorkloadEndpoint,
+		UnScheduleJobEndpoint:      unScheduleJobEnpoint,
 	}
 }
 
@@ -85,6 +94,29 @@ func makeScheduleWorkloadEndpoint(s service.Service) endpoint.Endpoint {
 		err := s.ScheduleWorkload(ctx, req.WorkloadId, req.Envs)
 
 		return ScheduleWorkloadResponse{
+			Err: err,
+		}, nil
+	}
+}
+
+type UnScheduleJobRequest struct {
+	JobId string
+}
+
+type UnScheduleJobResponse struct {
+	Err error `json:"-"`
+}
+
+func (r UnScheduleJobResponse) Failed() error {
+	return r.Err
+}
+
+func makeUnScheduleJobEndpoint(s service.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(UnScheduleJobRequest)
+		err := s.UnScheduleJob(ctx, req.JobId)
+
+		return UnScheduleJobResponse{
 			Err: err,
 		}, nil
 	}

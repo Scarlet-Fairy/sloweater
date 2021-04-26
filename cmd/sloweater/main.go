@@ -60,21 +60,30 @@ func main() {
 
 	configs := localStatic.NewConfig()
 
-	nomadOrchestrator := nomadOrchestrator.New(nomadClient, *configs, log.With(logger, "component", "orchestrator"), *registryUrl)
+	nomadOrchestrator := nomadOrchestrator.New(
+		nomadClient,
+		*configs,
+		log.With(
+			logger,
+			"component", "orchestrator",
+			"layer", "service",
+		),
+		*registryUrl,
+	)
 
-	svc := service.NewService(nomadOrchestrator, log.With(logger, "component", "service"))
-	endpoints := endpoint.NewEndpoints(svc, log.With(logger, "component", "endpoint"))
-	grpcServer := grpcTransport.NewGRPCServer(endpoints, log.With(logger, "component", "transport"))
+	svc := service.NewService(nomadOrchestrator, log.With(logger, "layer", "service"))
+	endpoints := endpoint.NewEndpoints(svc, log.With(logger, "layer", "endpoint"))
+	grpcServer := grpcTransport.NewGRPCServer(endpoints, log.With(logger, "layer", "transport"))
 
 	var g run.Group
 	{
 		grpcListener, err := net.Listen("tcp", *grpcAddr)
 		if err != nil {
-			errorLogger.Log("transport", "gRPC", "during", "Listen", "err", err)
+			errorLogger.Log("layer", "transport", "transport", "gRPC", "during", "Listen", "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Log("transport", "gRPC", "addr", *grpcAddr)
+			logger.Log("layer", "transport", "transport", "gRPC", "addr", *grpcAddr)
 
 			baseServer := grpc.NewServer(
 				grpc.UnaryInterceptor(kitgrpc.Interceptor),

@@ -14,4 +14,5 @@ var (
 type Orchestrator interface {
 	ScheduleBuildImageJob(ctx context.Context, workloadId WorkloadId, githubRepo string) (jobName *string, imageName *string, err error)
 	ScheduleWorkloadJob(ctx context.Context, workloadId WorkloadId, envs map[string]string) (err error)
+	UnScheduleJob(ctx context.Context, jobId string) (err error)
 }

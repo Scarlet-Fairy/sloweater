@@ -173,7 +173,7 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 	return err
 }
 
-func (n nomadOrchestrator) DeleteJob(_ context.Context, jobId string) error {
+func (n nomadOrchestrator) UnScheduleJob(_ context.Context, jobId string) error {
 	_, _, err := n.client.Jobs().Deregister(jobId, true, &api.WriteOptions{})
 	if err != nil {
 		return err

@@ -13,6 +13,7 @@ type grpcServer struct {
 	pb.UnimplementedSchedulerServer
 	scheduleImageBuild grpctransport.Handler
 	scheduleWorkload   grpctransport.Handler
+	unScheduleJob      grpctransport.Handler
 }
 
 func NewGRPCServer(endpoints endpoint.SchedulerEndpoint, logger log.Logger) pb.SchedulerServer {
@@ -31,6 +32,12 @@ func NewGRPCServer(endpoints endpoint.SchedulerEndpoint, logger log.Logger) pb.S
 			endpoints.ScheduleWorkloadEndpoint,
 			decodeScheduleWorkloadRequest,
 			encodeScheduleWorkloadResponse,
+			options...,
+		),
+		unScheduleJob: grpctransport.NewServer(
+			endpoints.UnScheduleJobEndpoint,
+			decodeUnScheduleJobRequest,
+			encodeUnScheduleJobResponse,
 			options...,
 		),
 	}
@@ -53,4 +60,13 @@ func (g grpcServer) ScheduleWorkload(ctx context.Context, request *pb.ScheduleWo
 	}
 
 	return resp.(*pb.ScheduleWorkloadResponse), nil
+}
+
+func (g grpcServer) UnScheduleJob(ctx context.Context, request *pb.UnScheduleJobRequest) (*pb.UnScheduleJobResponse, error) {
+	_, resp, err := g.unScheduleJob.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.(*pb.UnScheduleJobResponse), nil
 }

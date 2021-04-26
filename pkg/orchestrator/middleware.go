@@ -49,3 +49,15 @@ func (l *loggingMiddleware) ScheduleWorkloadJob(ctx context.Context, workloadId 
 
 	return l.next.ScheduleWorkloadJob(ctx, workloadId, envs)
 }
+
+func (l *loggingMiddleware) UnScheduleJob(ctx context.Context, jobId string) (err error) {
+	defer func() {
+		l.logger.Log(
+			"method", "UnScheduleJob",
+			"jobId", jobId,
+			"err", err,
+		)
+	}()
+
+	return l.next.UnScheduleJob(ctx, jobId)
+}

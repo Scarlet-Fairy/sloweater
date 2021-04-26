@@ -33,3 +33,14 @@ func decodeScheduleWorkloadRequest(_ context.Context, grpcReq interface{}) (inte
 func encodeScheduleWorkloadResponse(_ context.Context, resp interface{}) (interface{}, error) {
 	return &pb.ScheduleWorkloadResponse{}, nil
 }
+
+func decodeUnScheduleJobRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	req := grpcReq.(*pb.UnScheduleJobRequest)
+	return &endpoint.UnScheduleJobRequest{
+		JobId: req.JobId,
+	}, nil
+}
+
+func encodeUnScheduleJobResponse(_ context.Context, resp interface{}) (interface{}, error) {
+	return &pb.UnScheduleJobResponse{}, nil
+}

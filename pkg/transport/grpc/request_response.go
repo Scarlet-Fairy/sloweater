@@ -8,14 +8,14 @@ import (
 
 func decodeScheduleImageBuildRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*pb.ScheduleImageBuildRequest)
-	return endpoint.ScheduleImageBuildRequest{
+	return &endpoint.ScheduleImageBuildRequest{
 		GitRepoUrl: req.GitRepoUrl,
 		WorkloadId: req.WorkloadId,
 	}, nil
 }
 
 func encodeScheduleImageBuildResponse(_ context.Context, resp interface{}) (interface{}, error) {
-	res := resp.(endpoint.ScheduleImageBuildResponse)
+	res := resp.(*endpoint.ScheduleImageBuildResponse)
 	return &pb.ScheduleImageBuildResponse{
 		JobName:   *res.JobName,
 		ImageName: *res.ImageName,
@@ -31,7 +31,10 @@ func decodeScheduleWorkloadRequest(_ context.Context, grpcReq interface{}) (inte
 }
 
 func encodeScheduleWorkloadResponse(_ context.Context, resp interface{}) (interface{}, error) {
-	return &pb.ScheduleWorkloadResponse{}, nil
+	res := resp.(*endpoint.ScheduleWorkloadResponse)
+	return &pb.ScheduleWorkloadResponse{
+		JobName: *res.JobName,
+	}, nil
 }
 
 func decodeUnScheduleJobRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {

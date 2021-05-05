@@ -127,7 +127,7 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 	}
 
 	job := api.NewBatchJob(
-		string(jobId),
+		jobName,
 		jobName,
 		n.config.Orchestrate.Region,
 		n.config.Orchestrate.PriorityBatchJob,
@@ -140,7 +140,9 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 	return res, err
 }
 
-func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) error {
+func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) (*string, error) {
+	jobName := workloadId.NameWorkload()
+
 	task := api.NewTask(workloadId.NameWorkload(), DriverDocker)
 	task.Env = envs
 	task.Config = map[string]interface{}{
@@ -160,8 +162,8 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 	}
 
 	job := api.NewServiceJob(
-		string(workloadId),
-		workloadId.NameWorkload(),
+		jobName,
+		jobName,
 		n.config.Orchestrate.Region,
 		n.config.Orchestrate.PriorityWorkloadJob,
 	)
@@ -170,7 +172,7 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 
 	_, _, err := n.client.Jobs().Register(job, &api.WriteOptions{})
 
-	return err
+	return &jobName, err
 }
 
 func (n nomadOrchestrator) UnScheduleJob(_ context.Context, jobId string) error {

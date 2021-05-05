@@ -8,8 +8,9 @@ func NewConfig() *service.Config {
 			Logging: service.LoggingConfig{
 				LokiUrl: "localhost:3100",
 			},
-			Region:           "",
-			PriorityBatchJob: 50,
+			Region:              "",
+			PriorityBatchJob:    50,
+			PriorityWorkloadJob: 50,
 			Datacenters: []string{
 				"dc1",
 			},

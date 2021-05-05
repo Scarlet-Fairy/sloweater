@@ -64,10 +64,10 @@ func (r ScheduleImageBuildResponse) Failed() error {
 
 func makeScheduleImageBuildEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ScheduleImageBuildRequest)
+		req := request.(*ScheduleImageBuildRequest)
 		jobName, imageName, err := s.ScheduleImageBuild(ctx, req.WorkloadId, req.GitRepoUrl)
 
-		return ScheduleImageBuildResponse{
+		return &ScheduleImageBuildResponse{
 			JobName:   jobName,
 			ImageName: imageName,
 			Err:       err,
@@ -81,7 +81,8 @@ type ScheduleWorkloadRequest struct {
 }
 
 type ScheduleWorkloadResponse struct {
-	Err error `json:"-"`
+	JobName *string `json:"job_name"`
+	Err     error   `json:"-"`
 }
 
 func (r ScheduleWorkloadResponse) Failed() error {
@@ -90,11 +91,12 @@ func (r ScheduleWorkloadResponse) Failed() error {
 
 func makeScheduleWorkloadEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ScheduleWorkloadRequest)
-		err := s.ScheduleWorkload(ctx, req.WorkloadId, req.Envs)
+		req := request.(*ScheduleWorkloadRequest)
+		jobName, err := s.ScheduleWorkload(ctx, req.WorkloadId, req.Envs)
 
-		return ScheduleWorkloadResponse{
-			Err: err,
+		return &ScheduleWorkloadResponse{
+			JobName: jobName,
+			Err:     err,
 		}, nil
 	}
 }
@@ -113,10 +115,10 @@ func (r UnScheduleJobResponse) Failed() error {
 
 func makeUnScheduleJobEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(UnScheduleJobRequest)
+		req := request.(*UnScheduleJobRequest)
 		err := s.UnScheduleJob(ctx, req.JobId)
 
-		return UnScheduleJobResponse{
+		return &UnScheduleJobResponse{
 			Err: err,
 		}, nil
 	}

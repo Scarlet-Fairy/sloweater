@@ -2,5 +2,4 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-nomad job run "$DIR"/rabbitmq.hcl
-nomad job run "$DIR"/registry.hcl
+nomad job run "$DIR"/core.hcl

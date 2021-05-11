@@ -36,7 +36,7 @@ func (l *loggingMiddlware) ScheduleImageBuild(ctx context.Context, workloadId, g
 	return l.next.ScheduleImageBuild(ctx, workloadId, githubRepo)
 }
 
-func (l *loggingMiddlware) ScheduleWorkload(ctx context.Context, workloadId string, envs map[string]string) (err error) {
+func (l *loggingMiddlware) ScheduleWorkload(ctx context.Context, workloadId string, envs map[string]string) (jobName *string, err error) {
 	defer func() {
 		l.logger.Log(
 			"method", "ScheduleWorkload",

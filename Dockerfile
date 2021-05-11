@@ -19,8 +19,8 @@ WORKDIR /src
 
 ENV CGO_ENABLED=0
 
-# COPY go.* .
-# RUN go mod download
+COPY go.* ./
+RUN go mod download
 COPY . .
 
 # ---------------------- #
@@ -31,7 +31,7 @@ ARG TARGETOS=linux
 ARG TARGETARCH=amd64
 
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    go build -mod vendor \
+    go build \
     -o /out/sloweater \
     ./cmd/sloweater/main.go
 

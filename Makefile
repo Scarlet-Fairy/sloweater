@@ -2,7 +2,7 @@ GOCMD=go
 GOTEST=$(GOCMD) test
 BINARY_NAME=sloweater
 VERSION?=0.0.0
-SERVICE_PORT?=3000
+SERVICE_PORT?=8082
 DOCKER_REGISTRY?=scarletfairy/#if set it should finished by /
 EXPORT_RESULT?=false # for CI please set EXPORT_RESULT to true
 BIN_FOLDER?=bin/
@@ -83,7 +83,7 @@ proto-build:
 	@protoc \
 		--go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		pb/sloweater.proto
+		pb/*.proto
 
 docker-release:
 	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):latest

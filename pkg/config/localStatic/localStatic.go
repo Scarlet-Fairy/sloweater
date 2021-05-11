@@ -16,8 +16,8 @@ func NewConfig() *service.Config {
 			},
 			ImageBuilder: service.ImageBuilderConfig{
 				Services: service.ServicesConfig{
-					RedisServiceName:    "redis",
-					RedisServicePort:    10001,
+					RabbitMQServiceName: "rabbitmq",
+					RabbitMQServicePort: 10001,
 					RegistryServiceName: "image-registry",
 					RegistryServicePort: 5000,
 				},

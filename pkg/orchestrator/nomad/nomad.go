@@ -63,7 +63,7 @@ func (n *nomadOrchestrator) imageBuilderArgs(jobId string, githubRepo string) []
 		"--git-repo", githubRepo,
 		"--job-id", jobId,
 		"--docker-registry", fmt.Sprintf("localhost:%d", n.config.Orchestrate.ImageBuilder.Services.RegistryServicePort),
-		"--redis-url", fmt.Sprintf("redis://localhost:%d", n.config.Orchestrate.ImageBuilder.Services.RedisServicePort),
+		"--rabbitmq-url", fmt.Sprintf("amqp://guest:guest@localhost:%d/", n.config.Orchestrate.ImageBuilder.Services.RabbitMQServicePort),
 	}
 }
 
@@ -75,8 +75,8 @@ func (n *nomadOrchestrator) imageBuilderServices(id string) *api.Service {
 				Proxy: &api.ConsulProxy{
 					Upstreams: []*api.ConsulUpstream{
 						{
-							DestinationName: n.config.Orchestrate.ImageBuilder.Services.RedisServiceName,
-							LocalBindPort:   n.config.Orchestrate.ImageBuilder.Services.RedisServicePort,
+							DestinationName: n.config.Orchestrate.ImageBuilder.Services.RabbitMQServiceName,
+							LocalBindPort:   n.config.Orchestrate.ImageBuilder.Services.RabbitMQServicePort,
 						},
 						{
 							DestinationName: n.config.Orchestrate.ImageBuilder.Services.RegistryServiceName,

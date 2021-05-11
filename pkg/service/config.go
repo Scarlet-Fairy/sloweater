@@ -23,8 +23,8 @@ type ImageBuilderConfig struct {
 }
 
 type ServicesConfig struct {
-	RedisServiceName    string
-	RedisServicePort    int
+	RabbitMQServiceName string
+	RabbitMQServicePort int
 	RegistryServiceName string
 	RegistryServicePort int
 	LokiServiceName     string

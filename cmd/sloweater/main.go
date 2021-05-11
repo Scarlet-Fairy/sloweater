@@ -23,15 +23,17 @@ import (
 
 var ctx = context.Background()
 
+var (
+	grpcAddr    = flag.String("grpc-addr", ":8082", "gRPC server listen address")
+	registryUrl = flag.String("registry-url", "localhost:5000", "docker image registry url where cobold push builded images")
+	nomadUrl    = flag.String("nomad-url", "http://localhost:4646", "nomad api url")
+	consulUrl   = flag.String("consul-url", "http://localhost:8500", "consul api url")
+	// tracingHost = flag.String("tracing-host", "localhost", "host where send traces")
+	// tracingPort = flag.String("tracing-port", "6831", "port of the host where send traces")
+)
+
 func main() {
-	var (
-		grpcAddr    = flag.String("grpc-addr", ":8082", "gRPC listen address")
-		registryUrl = flag.String("registry-url", "localhost:5000", "docker image registry url where cobold push builded images")
-		nomadUrl    = flag.String("nomad-url", "http://localhost:4646", "nomad api url")
-		consulUrl   = flag.String("consul-url", "http://localhost:8500", "consul api url")
-		// tracingHost = flag.String("tracing-host", "localhost", "host where send traces")
-		// tracingPort = flag.String("tracing-port", "6831", "port of the host where send traces")
-	)
+	flag.Parse()
 
 	var logger log.Logger
 	{
@@ -79,11 +81,20 @@ func main() {
 	{
 		grpcListener, err := net.Listen("tcp", *grpcAddr)
 		if err != nil {
-			errorLogger.Log("layer", "transport", "transport", "gRPC", "during", "Listen", "err", err)
+			errorLogger.Log(
+				"layer", "transport",
+				"transport", "gRPC",
+				"during", "Listen",
+				"err", err,
+			)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Log("layer", "transport", "transport", "gRPC", "addr", *grpcAddr)
+			logger.Log(
+				"layer", "transport",
+				"transport", "gRPC",
+				"addr", *grpcAddr,
+			)
 
 			baseServer := grpc.NewServer(
 				grpc.UnaryInterceptor(kitgrpc.Interceptor),

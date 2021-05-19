@@ -82,6 +82,10 @@ func (n *nomadOrchestrator) imageBuilderServices(id string) *api.Service {
 							DestinationName: n.config.Orchestrate.ImageBuilder.Services.RegistryServiceName,
 							LocalBindPort:   n.config.Orchestrate.ImageBuilder.Services.RegistryServicePort,
 						},
+						{
+							DestinationName: n.config.Orchestrate.ImageBuilder.Services.ElasticServiceName,
+							LocalBindPort:   n.config.Orchestrate.ImageBuilder.Services.ElasticServicePort,
+						},
 					},
 				},
 			},
@@ -100,15 +104,15 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 	task := api.NewTask(jobName, DriverDocker)
 	task.Env = envs
 	task.Config = map[string]interface{}{
-		"image":      imageName,
-		"args":       args,
-		"force_pull": true,
+		"image": imageName,
+		"args":  args,
+		//"force_pull": true,
 		"volumes": []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
 		},
-		/*"logging": []map[string]interface{}{
-			loggingConfig(n.config.Orchestrate.Logging.LokiUrl),
-		},*/
+		"logging": []map[string]interface{}{
+			loggingConfig(n.config.Orchestrate.Logging.ElasticUrl, string(jobId)),
+		},
 	}
 	task.RestartPolicy = &api.RestartPolicy{
 		Attempts: &n.config.Orchestrate.RestartAttemps,

@@ -15,7 +15,7 @@ type OrchestrateConfig struct {
 }
 
 type LoggingConfig struct {
-	LokiUrl string
+	ElasticUrl string
 }
 
 type ImageBuilderConfig struct {
@@ -25,8 +25,10 @@ type ImageBuilderConfig struct {
 type ServicesConfig struct {
 	RabbitMQServiceName string
 	RabbitMQServicePort int
+
 	RegistryServiceName string
 	RegistryServicePort int
-	LokiServiceName     string
-	LokiServicePort     int
+
+	ElasticServiceName string
+	ElasticServicePort int
 }

@@ -6,7 +6,7 @@ func NewConfig() *service.Config {
 	return &service.Config{
 		Orchestrate: service.OrchestrateConfig{
 			Logging: service.LoggingConfig{
-				LokiUrl: "localhost:3100",
+				ElasticUrl: "http://localhost:9200",
 			},
 			Region:              "",
 			PriorityBatchJob:    50,
@@ -18,8 +18,12 @@ func NewConfig() *service.Config {
 				Services: service.ServicesConfig{
 					RabbitMQServiceName: "rabbitmq",
 					RabbitMQServicePort: 10001,
+
 					RegistryServiceName: "image-registry",
 					RegistryServicePort: 5000,
+
+					ElasticServiceName: "elasticsearch-api",
+					ElasticServicePort: 9200,
 				},
 			},
 		},

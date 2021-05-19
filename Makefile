@@ -118,7 +118,6 @@ help:
 	@echo "  ${YELLOW}lint-dockerfile ${RESET} ${GREEN}Lint your Dockerfile${RESET}"
 	@echo "  ${YELLOW}lint-go         ${RESET} ${GREEN}Use golintci-lint on your project${RESET}"
 	@echo "  ${YELLOW}test            ${RESET} ${GREEN}Run the tests of the project${RESET}"
-	@echo "  ${YELLOW}vendor          ${RESET} ${GREEN}Copy of all packages needed to support builds and tests in the vendor directory${RESET}"
 	@echo "  ${YELLOW}watch           ${RESET} ${GREEN}Run the code with cosmtrek/air to have automatic reload on changes${RESET}"
 	@echo "  ${YELLOW}run-jaeger      ${RESET} ${GREEN}Run Jaeger to store traces${RESET}"
 	@echo "  ${YELLOW}run-registry	  ${RESET} ${GREEN}Run a docker container registry on port 5000${RESET}"

@@ -1,15 +1,19 @@
 package nomad
 
 const (
-	lokiDriverName = "loki"
+	lokiDriverName    = "loki"
+	elasticDriverName = "elastic/elastic-logging-plugin:7.12.1"
+	indexName         = "scarlet-fairy-workloads"
 )
 
-func loggingConfig(lokiUrl string) map[string]interface{} {
+func loggingConfig(url string, id string) map[string]interface{} {
 	return map[string]interface{}{
-		"type": lokiDriverName,
+		"type": elasticDriverName,
 		"config": []map[string]string{
 			{
-				"loki-url": lokiUrl,
+				"hosts": url,
+				"name":  id,
+				"index": indexName,
 			},
 		},
 	}

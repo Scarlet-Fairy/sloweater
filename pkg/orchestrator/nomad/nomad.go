@@ -20,8 +20,9 @@ type nomadOrchestrator struct {
 }
 
 const (
-	DriverDocker = "docker"
-	CoboldImage  = "scarletfairy/cobold"
+	DriverDocker       = "docker"
+	CoboldImage        = "scarletfairy/cobold"
+	SidecarProxySuffix = "-sidecar-proxy"
 )
 
 func New(
@@ -158,7 +159,8 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) (*string, *string, error) {
 	jobName := workloadId.NameWorkload()
 	jobPort := n.workloadPort()
-	url := n.formatUrl(workloadId.NameService())
+	serviceName := workloadId.NameService()
+	url := n.formatUrl(serviceName)
 
 	envs["PORT"] = strconv.Itoa(jobPort)
 
@@ -181,12 +183,15 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 	}
 	taskGroup.Services = []*nomadApi.Service{
 		{
-			Name:      workloadId.NameService(),
+			Name:      serviceName,
 			PortLabel: strconv.Itoa(jobPort),
 			Connect: &nomadApi.ConsulConnect{
 				SidecarService: &nomadApi.ConsulSidecarService{},
 			},
 		},
+	}
+	taskGroup.ReschedulePolicy = &nomadApi.ReschedulePolicy{
+		Attempts: &n.config.Orchestrate.RestartAttemps,
 	}
 
 	job := nomadApi.NewServiceJob(
@@ -202,7 +207,7 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 		return nil, nil, err
 	}
 
-	if err := n.updateGatewayIngress(); err != nil {
+	if err := n.updateGatewayIngress(&serviceName); err != nil {
 		return nil, nil, err
 	}
 
@@ -213,8 +218,7 @@ func (n nomadOrchestrator) workloadPort() int {
 	return 8080
 }
 
-func (n nomadOrchestrator) updateGatewayIngress() error {
-
+func (n nomadOrchestrator) updateGatewayIngress(additionalService *string) error {
 	allServices, _, err := n.consulClient.Catalog().Services(&consulApi.QueryOptions{})
 	if err != nil {
 		return err
@@ -222,7 +226,7 @@ func (n nomadOrchestrator) updateGatewayIngress() error {
 
 	var serviceNames []string
 	for key := range allServices {
-		if strings.HasPrefix(key, fmt.Sprintf("%s-", service.ServiceNameWorkload)) {
+		if strings.HasPrefix(key, fmt.Sprintf("%s-", service.ServiceNameWorkload)) && !strings.HasSuffix(key, SidecarProxySuffix) {
 			if _, _, err := n.consulClient.ConfigEntries().Set(&consulApi.ServiceConfigEntry{
 				Kind:     consulApi.ServiceDefaults,
 				Name:     key,
@@ -233,6 +237,17 @@ func (n nomadOrchestrator) updateGatewayIngress() error {
 
 			serviceNames = append(serviceNames, key)
 		}
+	}
+	if additionalService != nil {
+		if _, _, err := n.consulClient.ConfigEntries().Set(&consulApi.ServiceConfigEntry{
+			Kind:     consulApi.ServiceDefaults,
+			Name:     *additionalService,
+			Protocol: "http",
+		}, &consulApi.WriteOptions{}); err != nil {
+			return err
+		}
+
+		serviceNames = append(serviceNames, *additionalService)
 	}
 
 	group := nomadApi.NewTaskGroup(n.config.Ingress.Name, 1)
@@ -296,11 +311,9 @@ func (n nomadOrchestrator) updateGatewayIngress() error {
 
 func (n nomadOrchestrator) formatUrl(serviceName string) string {
 	return fmt.Sprintf(
-		"%s://%s.%s:%d",
-		n.config.Ingress.Protocol,
+		"%s.%s",
 		serviceName,
 		n.config.Ingress.Host,
-		n.config.Ingress.Port,
 	)
 }
 
@@ -310,7 +323,7 @@ func (n nomadOrchestrator) UnScheduleJob(_ context.Context, jobId string) error 
 		return err
 	}
 
-	if err := n.updateGatewayIngress(); err != nil {
+	if err := n.updateGatewayIngress(nil); err != nil {
 		return err
 	}
 

@@ -24,6 +24,10 @@ func encodeScheduleImageBuildResponse(_ context.Context, resp interface{}) (inte
 
 func decodeScheduleWorkloadRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*pb.ScheduleWorkloadRequest)
+	if req.Envs == nil {
+		req.Envs = map[string]string{}
+	}
+
 	return &endpoint.ScheduleWorkloadRequest{
 		WorkloadId: req.WorkloadId,
 		Envs:       req.Envs,

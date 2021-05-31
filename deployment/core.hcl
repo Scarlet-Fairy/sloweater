@@ -21,15 +21,22 @@ job "core" {
       port = 5672
 
       connect {
-        sidecar_service {
-          proxy {
-            upstreams {
-              destination_name = "elasticsearch-api"
-              local_bind_port  = 9200
-            }
-          }
-        }
+        sidecar_service {}
       }
+    }
+
+    service {
+      name = "rabbit-manager"
+      port = 15672
+
+      check {
+        name     = "alive"
+        type     = "http"
+        path     = "/"
+        interval = "10s"
+        timeout  = "2s"
+      }
+
     }
 
     task "rabbitmq" {
@@ -96,6 +103,7 @@ job "core" {
     service {
       name = "elasticsearch-api"
       port = 9200
+
 
       connect {
         sidecar_service {}

@@ -54,7 +54,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, err = newConsulClient(*consulUrl)
+	consulClient, err := newConsulClient(*consulUrl)
 	if err != nil {
 		errorLogger.Log("err", err.Error(), "msg", "Unable to connect to consul", "consul-url", *consulUrl)
 		os.Exit(1)
@@ -64,6 +64,7 @@ func main() {
 
 	nomadOrchestrator := nomadOrchestrator.New(
 		nomadClient,
+		consulClient,
 		*configs,
 		log.With(
 			logger,

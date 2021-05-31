@@ -2,6 +2,7 @@ package service
 
 type Config struct {
 	Orchestrate OrchestrateConfig
+	Ingress     IngressConfig
 }
 
 type OrchestrateConfig struct {
@@ -31,4 +32,10 @@ type ServicesConfig struct {
 
 	ElasticServiceName string
 	ElasticServicePort int
+}
+
+type IngressConfig struct {
+	Name string
+	Port int
+	Host string
 }

@@ -6,11 +6,15 @@ import (
 	"github.com/Scarlet-Fairy/sloweater/pkg/orchestrator"
 	"github.com/Scarlet-Fairy/sloweater/pkg/service"
 	"github.com/go-kit/kit/log"
-	"github.com/hashicorp/nomad/api"
+	consulApi "github.com/hashicorp/consul/api"
+	nomadApi "github.com/hashicorp/nomad/api"
+	"strconv"
+	"strings"
 )
 
 type nomadOrchestrator struct {
-	client           *api.Client
+	nomadClient      *nomadApi.Client
+	consulClient     *consulApi.Client
 	config           service.Config
 	registryEndpoint string
 }
@@ -20,11 +24,18 @@ const (
 	CoboldImage  = "scarletfairy/cobold"
 )
 
-func New(client *api.Client, config service.Config, logger log.Logger, registryEndpoint string) service.Orchestrator {
+func New(
+	nomadClient *nomadApi.Client,
+	consulClient *consulApi.Client,
+	config service.Config,
+	logger log.Logger,
+	registryEndpoint string,
+) service.Orchestrator {
 	var orc service.Orchestrator
 	{
 		orc = &nomadOrchestrator{
-			client:           client,
+			nomadClient:      nomadClient,
+			consulClient:     consulClient,
 			config:           config,
 			registryEndpoint: registryEndpoint,
 		}
@@ -44,8 +55,8 @@ func (n *nomadOrchestrator) ScheduleBuildImageJob(ctx context.Context, jobId ser
 		map[string]string{
 			//"DEV": "true",
 		},
-		[]*api.Service{
-			n.imageBuilderServices(string(jobId)),
+		[]*nomadApi.Service{
+			n.imageBuilderServices(jobId.NameService()),
 		},
 	)
 	if err != nil {
@@ -67,13 +78,13 @@ func (n *nomadOrchestrator) imageBuilderArgs(jobId string, githubRepo string) []
 	}
 }
 
-func (n *nomadOrchestrator) imageBuilderServices(id string) *api.Service {
-	return &api.Service{
+func (n *nomadOrchestrator) imageBuilderServices(id string) *nomadApi.Service {
+	return &nomadApi.Service{
 		Name: id,
-		Connect: &api.ConsulConnect{
-			SidecarService: &api.ConsulSidecarService{
-				Proxy: &api.ConsulProxy{
-					Upstreams: []*api.ConsulUpstream{
+		Connect: &nomadApi.ConsulConnect{
+			SidecarService: &nomadApi.ConsulSidecarService{
+				Proxy: &nomadApi.ConsulProxy{
+					Upstreams: []*nomadApi.ConsulUpstream{
 						{
 							DestinationName: n.config.Orchestrate.ImageBuilder.Services.RabbitMQServiceName,
 							LocalBindPort:   n.config.Orchestrate.ImageBuilder.Services.RabbitMQServicePort,
@@ -99,9 +110,9 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 	jobName, imageName string,
 	args []string,
 	envs map[string]string,
-	services []*api.Service,
-) (*api.JobRegisterResponse, error) {
-	task := api.NewTask(jobName, DriverDocker)
+	services []*nomadApi.Service,
+) (*nomadApi.JobRegisterResponse, error) {
+	task := nomadApi.NewTask(jobName, DriverDocker)
 	task.Env = envs
 	task.Config = map[string]interface{}{
 		"image": imageName,
@@ -114,23 +125,23 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 			loggingConfig(n.config.Orchestrate.Logging.ElasticUrl, string(jobId)),
 		},
 	}
-	task.RestartPolicy = &api.RestartPolicy{
+	task.RestartPolicy = &nomadApi.RestartPolicy{
 		Attempts: &n.config.Orchestrate.RestartAttemps,
 	}
 
-	taskGroup := api.NewTaskGroup(jobName, 1)
+	taskGroup := nomadApi.NewTaskGroup(jobName, 1)
 	taskGroup.AddTask(task)
-	taskGroup.ReschedulePolicy = &api.ReschedulePolicy{
+	taskGroup.ReschedulePolicy = &nomadApi.ReschedulePolicy{
 		Attempts: &n.config.Orchestrate.RestartAttemps,
 	}
 	taskGroup.Services = services
-	taskGroup.Networks = []*api.NetworkResource{
+	taskGroup.Networks = []*nomadApi.NetworkResource{
 		{
 			Mode: "bridge",
 		},
 	}
 
-	job := api.NewBatchJob(
+	job := nomadApi.NewBatchJob(
 		jobName,
 		jobName,
 		n.config.Orchestrate.Region,
@@ -139,33 +150,44 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 	job.AddTaskGroup(taskGroup)
 	job.Datacenters = n.config.Orchestrate.Datacenters
 
-	res, _, err := n.client.Jobs().Register(job, &api.WriteOptions{})
+	res, _, err := n.nomadClient.Jobs().Register(job, &nomadApi.WriteOptions{})
 
 	return res, err
 }
 
 func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) (*string, error) {
 	jobName := workloadId.NameWorkload()
+	jobPort := n.workloadPort()
+	envs["PORT"] = strconv.Itoa(jobPort)
 
-	task := api.NewTask(workloadId.NameWorkload(), DriverDocker)
+	task := nomadApi.NewTask(workloadId.NameWorkload(), DriverDocker)
 	task.Env = envs
 	task.Config = map[string]interface{}{
 		"image":      workloadId.ImageName(n.registryEndpoint),
 		"force_pull": true,
 	}
-	task.RestartPolicy = &api.RestartPolicy{
+	task.RestartPolicy = &nomadApi.RestartPolicy{
 		Attempts: &n.config.Orchestrate.RestartAttemps,
 	}
 
-	taskGroup := api.NewTaskGroup(workloadId.NameWorkload(), 1)
+	taskGroup := nomadApi.NewTaskGroup(workloadId.NameWorkload(), 1)
 	taskGroup.AddTask(task)
-	taskGroup.Networks = []*api.NetworkResource{
+	taskGroup.Networks = []*nomadApi.NetworkResource{
 		{
 			Mode: "bridge",
 		},
 	}
+	taskGroup.Services = []*nomadApi.Service{
+		{
+			Name:      workloadId.NameService(),
+			PortLabel: strconv.Itoa(jobPort),
+			Connect: &nomadApi.ConsulConnect{
+				SidecarService: &nomadApi.ConsulSidecarService{},
+			},
+		},
+	}
 
-	job := api.NewServiceJob(
+	job := nomadApi.NewServiceJob(
 		jobName,
 		jobName,
 		n.config.Orchestrate.Region,
@@ -174,14 +196,109 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 	job.AddTaskGroup(taskGroup)
 	job.Datacenters = n.config.Orchestrate.Datacenters
 
-	_, _, err := n.client.Jobs().Register(job, &api.WriteOptions{})
+	if _, _, err := n.nomadClient.Jobs().Register(job, &nomadApi.WriteOptions{}); err != nil {
+		return nil, err
+	}
 
-	return &jobName, err
+	if err := n.updateGatewayIngress(); err != nil {
+		return nil, err
+	}
+
+	return &jobName, nil
+}
+
+func (n nomadOrchestrator) workloadPort() int {
+	return 8080
+}
+
+func (n nomadOrchestrator) updateGatewayIngress() error {
+
+	allServices, _, err := n.consulClient.Catalog().Services(&consulApi.QueryOptions{})
+	if err != nil {
+		return err
+	}
+
+	var serviceNames []string
+	for key := range allServices {
+		if strings.HasPrefix(key, fmt.Sprintf("%s-", service.ServiceNameWorkload)) {
+			if _, _, err := n.consulClient.ConfigEntries().Set(&consulApi.ServiceConfigEntry{
+				Kind:     consulApi.ServiceDefaults,
+				Name:     key,
+				Protocol: "http",
+			}, &consulApi.WriteOptions{}); err != nil {
+				return err
+			}
+
+			serviceNames = append(serviceNames, key)
+		}
+	}
+
+	group := nomadApi.NewTaskGroup(n.config.Ingress.Name, 1)
+	group.Networks = []*nomadApi.NetworkResource{
+		{
+			Mode: "bridge",
+			ReservedPorts: []nomadApi.Port{
+				{
+					Label: "inbound",
+					Value: n.config.Ingress.Port,
+					To:    n.config.Ingress.Port,
+				},
+			},
+		},
+	}
+
+	var services []*nomadApi.ConsulIngressService
+	for _, name := range serviceNames {
+		services = append(services, &nomadApi.ConsulIngressService{
+			Name:  name,
+			Hosts: []string{fmt.Sprintf("%s.%s", name, n.config.Ingress.Host)},
+		})
+	}
+
+	group.Services = []*nomadApi.Service{
+		{
+			Name:      n.config.Ingress.Name,
+			PortLabel: strconv.Itoa(n.config.Ingress.Port),
+			Connect: &nomadApi.ConsulConnect{
+				Gateway: &nomadApi.ConsulGateway{
+					Proxy: &nomadApi.ConsulGatewayProxy{},
+					Ingress: &nomadApi.ConsulIngressConfigEntry{
+						Listeners: []*nomadApi.ConsulIngressListener{
+							{
+								Port:     n.config.Ingress.Port,
+								Protocol: "http",
+								Services: services,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	job := nomadApi.NewServiceJob(
+		n.config.Ingress.Name,
+		n.config.Ingress.Name,
+		n.config.Orchestrate.Region,
+		n.config.Orchestrate.PriorityWorkloadJob,
+	)
+	job.Datacenters = n.config.Orchestrate.Datacenters
+	job.AddTaskGroup(group)
+
+	if _, _, err = n.nomadClient.Jobs().Register(job, &nomadApi.WriteOptions{}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (n nomadOrchestrator) UnScheduleJob(_ context.Context, jobId string) error {
-	_, _, err := n.client.Jobs().Deregister(jobId, true, &api.WriteOptions{})
+	_, _, err := n.nomadClient.Jobs().Deregister(jobId, true, &nomadApi.WriteOptions{})
 	if err != nil {
+		return err
+	}
+
+	if err := n.updateGatewayIngress(); err != nil {
 		return err
 	}
 

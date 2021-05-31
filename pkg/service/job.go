@@ -7,9 +7,10 @@ import (
 type WorkloadId string
 
 const (
-	JobTypeImageBuild = "imagebuild"
-	JobTypeWorkload   = "workload"
-	NameImageBuilder  = "cobold"
+	JobTypeImageBuild   = "imagebuild"
+	JobTypeWorkload     = "workload"
+	ServiceNameWorkload = "svc"
+	NameImageBuilder    = "cobold"
 )
 
 func (id WorkloadId) NameImageBuild() string {
@@ -18,6 +19,10 @@ func (id WorkloadId) NameImageBuild() string {
 
 func (id WorkloadId) NameWorkload() string {
 	return fmt.Sprintf("%s.%s", JobTypeWorkload, id)
+}
+
+func (id WorkloadId) NameService() string {
+	return fmt.Sprintf("%s-%s", ServiceNameWorkload, id)
 }
 
 func (id WorkloadId) ImageName(registry string) string {

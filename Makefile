@@ -8,6 +8,9 @@ EXPORT_RESULT?=false # for CI please set EXPORT_RESULT to true
 BIN_FOLDER?=bin/
 MAIN_PATH?=cmd/sloweater/main.go
 
+NOMAD_URL=http://192.168.44.25:4646
+CONSUL_URL=http://192.168.44.25:8500
+REGISTRY_URL=localhost:5000
 
 GREEN  := $(shell tput -Txterm setaf 2)
 YELLOW := $(shell tput -Txterm setaf 3)
@@ -93,7 +96,7 @@ docker-release:
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
 
 run:
-	@$(GOCMD) run $(MAIN_PATH)
+	@$(GOCMD) run $(MAIN_PATH) --nomad-url $(NOMAD_URL) --consul-url $(CONSUL_URL) --registry-url $(REGISTRY_URL)
 
 docker-run: docker-build
 	docker run --network host $(BINARY_NAME)

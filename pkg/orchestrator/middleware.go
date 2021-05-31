@@ -37,13 +37,14 @@ func (l *loggingMiddleware) ScheduleBuildImageJob(ctx context.Context, jobId ser
 	return l.next.ScheduleBuildImageJob(ctx, jobId, githubRepo)
 }
 
-func (l *loggingMiddleware) ScheduleWorkloadJob(ctx context.Context, workloadId service.WorkloadId, envs map[string]string) (jobName *string, err error) {
+func (l *loggingMiddleware) ScheduleWorkloadJob(ctx context.Context, workloadId service.WorkloadId, envs map[string]string) (jobName *string, url *string, err error) {
 	defer func() {
 		l.logger.Log(
 			"method", "ScheduleWorkloadJob",
 			"workloadId", workloadId,
 			"envs", envs,
 			"jobName", jobName,
+			"url", url,
 			"err", err,
 		)
 	}()

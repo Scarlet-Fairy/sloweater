@@ -155,9 +155,11 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 	return res, err
 }
 
-func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) (*string, error) {
+func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) (*string, *string, error) {
 	jobName := workloadId.NameWorkload()
 	jobPort := n.workloadPort()
+	url := fmt.Sprintf("%s.%s", workloadId.NameService(), n.config.Ingress.Host)
+
 	envs["PORT"] = strconv.Itoa(jobPort)
 
 	task := nomadApi.NewTask(workloadId.NameWorkload(), DriverDocker)
@@ -197,14 +199,14 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 	job.Datacenters = n.config.Orchestrate.Datacenters
 
 	if _, _, err := n.nomadClient.Jobs().Register(job, &nomadApi.WriteOptions{}); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := n.updateGatewayIngress(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &jobName, nil
+	return &jobName, &url, nil
 }
 
 func (n nomadOrchestrator) workloadPort() int {

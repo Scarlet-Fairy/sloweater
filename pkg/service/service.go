@@ -7,7 +7,7 @@ import (
 
 type Service interface {
 	ScheduleImageBuild(ctx context.Context, workloadId, githubRepo string) (jobName *string, imageName *string, err error)
-	ScheduleWorkload(ctx context.Context, workloadId string, envs map[string]string) (jobName *string, err error)
+	ScheduleWorkload(ctx context.Context, workloadId string, envs map[string]string) (jobName *string, url *string, err error)
 	UnScheduleJob(ctx context.Context, jobId string) error
 }
 
@@ -36,13 +36,13 @@ func (s basicService) ScheduleImageBuild(ctx context.Context, workloadId string,
 	return jobId, imageName, nil
 }
 
-func (s basicService) ScheduleWorkload(ctx context.Context, workloadId string, envs map[string]string) (*string, error) {
-	jobName, err := s.orchestrator.ScheduleWorkloadJob(ctx, WorkloadId(workloadId), envs)
+func (s basicService) ScheduleWorkload(ctx context.Context, workloadId string, envs map[string]string) (*string, *string, error) {
+	jobName, url, err := s.orchestrator.ScheduleWorkloadJob(ctx, WorkloadId(workloadId), envs)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return jobName, nil
+	return jobName, url, nil
 }
 
 func (s basicService) UnScheduleJob(ctx context.Context, jobId string) error {

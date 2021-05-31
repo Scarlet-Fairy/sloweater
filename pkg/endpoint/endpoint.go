@@ -82,6 +82,7 @@ type ScheduleWorkloadRequest struct {
 
 type ScheduleWorkloadResponse struct {
 	JobName *string `json:"job_name"`
+	Url     *string `json:"url"`
 	Err     error   `json:"-"`
 }
 
@@ -92,10 +93,11 @@ func (r ScheduleWorkloadResponse) Failed() error {
 func makeScheduleWorkloadEndpoint(s service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(*ScheduleWorkloadRequest)
-		jobName, err := s.ScheduleWorkload(ctx, req.WorkloadId, req.Envs)
+		jobName, url, err := s.ScheduleWorkload(ctx, req.WorkloadId, req.Envs)
 
 		return &ScheduleWorkloadResponse{
 			JobName: jobName,
+			Url:     url,
 			Err:     err,
 		}, nil
 	}

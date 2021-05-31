@@ -34,6 +34,7 @@ func encodeScheduleWorkloadResponse(_ context.Context, resp interface{}) (interf
 	res := resp.(*endpoint.ScheduleWorkloadResponse)
 	return &pb.ScheduleWorkloadResponse{
 		JobName: *res.JobName,
+		Url:     *res.Url,
 	}, nil
 }
 

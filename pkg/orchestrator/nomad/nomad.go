@@ -122,9 +122,6 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 		"volumes": []string{
 			"/var/run/docker.sock:/var/run/docker.sock",
 		},
-		"logging": []map[string]interface{}{
-			loggingConfig(n.config.Orchestrate.Logging.ElasticUrl, string(jobId)),
-		},
 	}
 	task.RestartPolicy = &nomadApi.RestartPolicy{
 		Attempts: &n.config.Orchestrate.RestartAttemps,
@@ -169,6 +166,9 @@ func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId ser
 	task.Config = map[string]interface{}{
 		"image":      workloadId.ImageName(n.registryEndpoint),
 		"force_pull": true,
+		"logging": []map[string]interface{}{
+			loggingConfig(n.config.Orchestrate.Logging.ElasticUrl, string(workloadId)),
+		},
 	}
 	task.RestartPolicy = &nomadApi.RestartPolicy{
 		Attempts: &n.config.Orchestrate.RestartAttemps,
@@ -226,6 +226,10 @@ func (n nomadOrchestrator) updateGatewayIngress(additionalService *string) error
 
 	var serviceNames []string
 	for key := range allServices {
+		if additionalService != nil && *additionalService == key {
+			continue
+		}
+
 		if strings.HasPrefix(key, fmt.Sprintf("%s-", service.ServiceNameWorkload)) && !strings.HasSuffix(key, SidecarProxySuffix) {
 			if _, _, err := n.consulClient.ConfigEntries().Set(&consulApi.ServiceConfigEntry{
 				Kind:     consulApi.ServiceDefaults,

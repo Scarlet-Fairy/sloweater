@@ -35,7 +35,8 @@ type ServicesConfig struct {
 }
 
 type IngressConfig struct {
-	Name string
-	Port int
-	Host string
+	Protocol string
+	Name     string
+	Host     string
+	Port     int
 }

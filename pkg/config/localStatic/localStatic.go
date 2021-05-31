@@ -28,9 +28,10 @@ func NewConfig() *service.Config {
 			},
 		},
 		Ingress: service.IngressConfig{
-			Name: "core-ingress",
-			Port: 80,
-			Host: "192.168.44.25.nip.io",
+			Name:     "core-ingress",
+			Port:     80,
+			Host:     "192.168.44.25.nip.io",
+			Protocol: "http",
 		},
 	}
 }

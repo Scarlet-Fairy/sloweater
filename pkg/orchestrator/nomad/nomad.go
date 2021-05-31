@@ -158,7 +158,7 @@ func (n *nomadOrchestrator) ScheduleBatchJob(
 func (n nomadOrchestrator) ScheduleWorkloadJob(_ context.Context, workloadId service.WorkloadId, envs map[string]string) (*string, *string, error) {
 	jobName := workloadId.NameWorkload()
 	jobPort := n.workloadPort()
-	url := fmt.Sprintf("%s.%s", workloadId.NameService(), n.config.Ingress.Host)
+	url := n.formatUrl(workloadId.NameService())
 
 	envs["PORT"] = strconv.Itoa(jobPort)
 
@@ -253,7 +253,7 @@ func (n nomadOrchestrator) updateGatewayIngress() error {
 	for _, name := range serviceNames {
 		services = append(services, &nomadApi.ConsulIngressService{
 			Name:  name,
-			Hosts: []string{fmt.Sprintf("%s.%s", name, n.config.Ingress.Host)},
+			Hosts: []string{n.formatUrl(name)},
 		})
 	}
 
@@ -292,6 +292,16 @@ func (n nomadOrchestrator) updateGatewayIngress() error {
 	}
 
 	return nil
+}
+
+func (n nomadOrchestrator) formatUrl(serviceName string) string {
+	return fmt.Sprintf(
+		"%s://%s.%s:%d",
+		n.config.Ingress.Protocol,
+		serviceName,
+		n.config.Ingress.Host,
+		n.config.Ingress.Port,
+	)
 }
 
 func (n nomadOrchestrator) UnScheduleJob(_ context.Context, jobId string) error {
